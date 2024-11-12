@@ -3,12 +3,38 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@emotion/react": "^11.13.3",
+    "@emotion/styled": "^11.13.0",
+    "@fooloomanzoo/datetime-input": "^3.0.4",
+    "@handsontable/react": "^13.1.0",
+    "@heroicons/react": "^2.0.18",
+    "@mui/icons-material": "^6.1.2",
+    "@mui/material": "^6.1.2",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
+    "axios": "^1.4.0",
+    "bootstrap": "^5.3.3",
+    "cors-anywhere": "^0.4.4",
+    "date-fn": "^0.0.2",
+    "date-fns": "^2.30.0",
+    "firebase-admin": "^11.0.1",
+    "firebase-functions": "^4.0.1",
+    "fullcalendar": "^6.1.9",
+    "handsontable": "^13.1.0",
+    "install": "^0.13.0",
     "react": "^18.2.0",
+    "react-big-calendar": "^1.8.4",
+    "react-bootstrap": "^2.10.3",
+    "react-datepicker": "^4.20.0",
     "react-dom": "^18.2.0",
-    "react-scripts": "5.0.1",
+    "react-helmet": "^6.1.0",
+    "react-helmet-async": "^1.3.0",
+    "react-hook-form": "^7.47.0",
+    "react-router-dom": "^6.15.0",
+    "react-scripts": "^5.0.1",
+    "react-secure-storage": "^1.3.0",
+    "react-to-print": "^2.14.15",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
@@ -34,5 +60,9 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "firebase-functions-test": "^0.2.0",
+    "tailwindcss": "^3.3.3"
   }
 }

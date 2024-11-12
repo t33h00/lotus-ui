@@ -1,0 +1,17 @@
+{
+  "hosting": {
+    "public": "build",
+    "rewrites": [
+      {
+          "source": "**",
+          "function": "proxyWithCorsAnywhere",
+          "destination": "/index.html"
+      }
+    ],
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ]
+  }
+}
