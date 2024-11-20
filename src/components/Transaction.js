@@ -22,6 +22,7 @@ function Transaction() {
   const mili = new Date().getTime() - 21600000;
   const today = new Date(mili).toJSON().slice(0, 10);
   const [startDate, setStartDate] = useState(today || date);
+  console.log("From Transaction")
 
   useEffect(() => {
       data();
@@ -154,6 +155,7 @@ function Transaction() {
               type="text"
               className="input"
               name="name"
+              required
               onChange={(e) => handleChange(e)}
               value={transaction.name}
             />

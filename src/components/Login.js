@@ -44,7 +44,7 @@ function Login() {
     }
    }
    if(!loading){
-    role==='[ROLE_USER]'?( window.location.href = "/transaction/" + `${today}` ): window.location.href = "/employeelist"
+    window.location.href = "/transaction/" + `${today}`;
   }
   return (
     <>

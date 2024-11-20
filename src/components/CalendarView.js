@@ -12,15 +12,17 @@ import CalViewDetail from "./CalViewDetail";
 import "./CalendarView.css";
 import { Helmet } from "react-helmet-async";
 import { BASE_URL } from "../Service/Service";
+import { useNavigate } from "react-router-dom";
 
 function CalendarView() {
   const FINDALL_URL = BASE_URL +  "api/calendarview";
+  const navigate = useNavigate();
   const allDay = true;
   const [jwt, setJwt] = useLocalState("", "jwt");
-  const [user, setUser] = useLocalState("", "user");
   const [details, setDetails] = useState([]);
   const [date, setDate] = useState(null);
   const [mon,setMon] = useState((new Date().getFullYear()+ "-" + (new Date().getMonth()+1).toString().padStart(2,"0") + "%"));
+  console.log("From CalendarView")
 
   function handleMonth(e){
       let year = e.getFullYear();
@@ -44,7 +46,11 @@ function CalendarView() {
   };
 
   const data = async () => {
-    await axios.get(FINDALL_URL, config).then((res) => setDetails(res.data));
+    try{
+      await axios.get(FINDALL_URL, config).then((res) => setDetails(res.data));
+    } catch (error){
+      navigate("/login")
+    }
   };
 
   useEffect(() => {

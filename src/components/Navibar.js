@@ -3,12 +3,10 @@ import "./navibar.css";
 import useLocalState from "./useLocalState";
 import {Navigate, Link, useNavigate} from 'react-router-dom';
 import { BottomNavigation, BottomNavigationAction } from "@mui/material";
-import MuiBottomNavigationAction from "@mui/material/BottomNavigationAction";
 import EditNoteIcon from '@mui/icons-material/EditNote';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
-import { styled } from "@mui/material/styles";
 
 function Navibar(){
     const [isOpen, setIsOpen] = useState(false);
@@ -44,11 +42,7 @@ function Navibar(){
               break;
           }};
     const handleTransaction = ()=> {
-        if(user !== null){
             navigate("/transaction/" + `${today}`);
-        } else {
-            navigate("/login");
-        }
     }
 
     const handleCalendar = ()=> {

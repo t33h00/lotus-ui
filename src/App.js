@@ -34,15 +34,15 @@ function App() {
             <Route path="/transaction/:date" element={<PrivateRoute><Transaction/></PrivateRoute>}></Route>
             <Route index element={<PrivateRoute><Transaction/></PrivateRoute>}></Route>
             <Route path='/employeelist' element={<PrivateRoute><EmployeeList/></PrivateRoute>}/>
-            <Route path='/signup' element={<SignUp/>}/>
-            <Route path='/test' element={<Test/>}/>
             <Route path='/user' element={<PrivateRoute> <User/> </PrivateRoute>}/>
             <Route path='/salereport' element={<PrivateRoute> <SaleReport/> </PrivateRoute>}/>
             <Route path='/earning' element={<PrivateRoute><Earning/></PrivateRoute>}></Route>
-            <Route path='/login' element={<Login/>}></Route>
             <Route path='/calendarview' element={<PrivateRoute><CalendarView/></PrivateRoute>}/>
             <Route path='/calviewdetail' element={<PrivateRoute><CalViewDetail/></PrivateRoute>}/>
             <Route path='/edittransaction/:id' element={<PrivateRoute><EditTransaction/></PrivateRoute>}/>
+            <Route path='/login' element={<Login/>}></Route>
+            <Route path='/signup' element={<SignUp/>}/>
+            <Route path='/test' element={<Test/>}/>
         </Routes>
         </HelmetProvider>
       </BrowserRouter>

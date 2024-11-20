@@ -5,6 +5,7 @@ import "./Earning.css";
 import { useReactToPrint } from "react-to-print";
 import { Helmet } from "react-helmet-async";
 import { BASE_URL } from "../Service/Service";
+import { useNavigate } from "react-router-dom";
 
 function Earning() {
   const CUSTOM_DATE_URL = BASE_URL + "api/customdate";
@@ -17,6 +18,7 @@ function Earning() {
   const [details, setDetails] = useState([]);
   const [userProfile, setUserProfile] = useLocalState("", "userProfile");
   const [rate, setRate] = useState(60);
+  const navigate = useNavigate();
   let role = user.authorities;
 
   let componentRef = useRef();
@@ -38,9 +40,13 @@ function Earning() {
       };
 
       const data = async () => {
+       try{
         await axios
-          .get(CUSTOM_DATE_URL, config)
-          .then((res) => setDetails(res.data));
+        .get(CUSTOM_DATE_URL, config)
+        .then((res) => setDetails(res.data));
+       } catch (error){
+        navigate("/login");
+       }
       };
       data();
     } else if (role === "[ROLE_ADMIN]") {

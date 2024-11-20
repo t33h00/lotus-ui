@@ -5,6 +5,7 @@ import "./Transaction.css";
 function User() {
   const [user, setUser] = useLocalState("", "user");
   const fullName = user.firstName + " " + user.lastName;
+  console.log("From user")
 
   return (
     <div className="wrapper">
