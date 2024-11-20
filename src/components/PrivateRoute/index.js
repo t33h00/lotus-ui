@@ -10,7 +10,6 @@ const PrivateRoute = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isValid, setIsValid] = useState(false);
   const navigate = useNavigate();
-  console.log("Calling from Private Route")
   let config = {
     headers: {
       Authorization: `Bearer ${jwt}`,
@@ -27,7 +26,6 @@ const PrivateRoute = ({ children }) => {
       setIsLoading(false);
     })
   }
-  checkValid();
   useEffect(()=>{
     if (jwt) {
       checkValid();
@@ -35,9 +33,9 @@ const PrivateRoute = ({ children }) => {
       navigate("/login")
     }
   },[]);
-  console.log("isValid: ", isValid)
+
   return isLoading ? (
-    <div>...loading</div>
+    <div className="loading"></div>
   ) : isValid ? (
     children
   ) : (

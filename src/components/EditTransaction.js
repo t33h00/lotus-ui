@@ -7,6 +7,14 @@ import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { BASE_URL } from "../Service/Service";
 
+const payType = [
+  {value: "CH", label:"CH"},
+  {value: "CC", label:"CC"},
+  {value: "ZE", label:"ZE"},
+  {value: "VE", label:"VE"},
+  {value: "GC", label:"GC"},
+]
+
 function EditTransaction() {
     const TRANSACTION_URL = BASE_URL + "api/transaction";
     const UPDATE_URL = BASE_URL + "api/edittransaction";
@@ -27,7 +35,9 @@ function EditTransaction() {
           }
           }
       await axios.get(TRANSACTION_URL, config)
-                  .then((res)=>setTransaction(res.data));
+                  .then((res)=>{
+                    setTransaction(res.data);
+                  });
                   }
     useEffect(()=>{
       fetchData();
@@ -57,10 +67,10 @@ function EditTransaction() {
   }
 
   const handleChange = (e) => {
-      if(e.target.name!==null){
         let value = e.target.value;
         setTransaction({...transaction, [e.target.name]:value})
-      }
+        console.log(transaction)
+  
   };
 
   return (

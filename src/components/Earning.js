@@ -5,7 +5,6 @@ import "./Earning.css";
 import { useReactToPrint } from "react-to-print";
 import { Helmet } from "react-helmet-async";
 import { BASE_URL } from "../Service/Service";
-import { useNavigate } from "react-router-dom";
 
 function Earning() {
   const CUSTOM_DATE_URL = BASE_URL + "api/customdate";
@@ -18,12 +17,20 @@ function Earning() {
   const [details, setDetails] = useState([]);
   const [userProfile, setUserProfile] = useLocalState("", "userProfile");
   const [rate, setRate] = useState(60);
-  const navigate = useNavigate();
   let role = user.authorities;
 
   let componentRef = useRef();
   const handlePrint = useReactToPrint({
     content: () => componentRef.current,
+    pageStyle: ` @media print {
+      @page {
+        size: 72mm full portrait;
+        margin: 0;
+      }
+      .print-button {
+        display: none !important;}
+    }
+    `
   });
 
   useEffect(() => {
@@ -40,13 +47,10 @@ function Earning() {
       };
 
       const data = async () => {
-       try{
         await axios
-        .get(CUSTOM_DATE_URL, config)
-        .then((res) => setDetails(res.data));
-       } catch (error){
-        navigate("/login");
-       }
+          .get(CUSTOM_DATE_URL, config)
+          .then((res) => {setDetails(res.data)});
+          
       };
       data();
     } else if (role === "[ROLE_ADMIN]") {
@@ -79,8 +83,14 @@ function Earning() {
   var tips = Math.round(details.reduce((accum, item) => accum + item.tip, 0));
   var deduct = Math.round((sum * (100 - rate)) / 100);
   var estimate = Math.round(sum - deduct + tips);
+  var payCH = details.reduce((accum, item) => {
+    if(item.by === 'CH'){
+      return accum + item.amount;
+    } else {
+      return accum;
+    }
+  }, 0);
   const fullName = user.firstName + " " + user.lastName;
-
   return (
     <>
       <Helmet>
@@ -131,11 +141,9 @@ function Earning() {
       </div>
       {/* --------------------------  */}
       <div className="receipt">
-      <div style={{ color: "white", margin: "20px" }}>
-        <button style={{color:"blue"}} onClick={() => handlePrint()}>Print</button>
-      </div>
-      {total > 0 && (
+            {total > 0 && (
         <div style={{paddingBottom:"60px", marginBottom:"60px"}} className="container" ref={componentRef}>
+<button className="print-button" onClick={() => handlePrint()}>Print</button>
           <div className="receipt_header">
             <h1>
               Receipt of Labor{" "}
@@ -156,15 +164,26 @@ function Earning() {
             <div className="items">
               <table>
                 <thead>
-                  <th>Date</th>
-                  <th>TIP</th>
-                  <th>COUNT</th>
-                  <th>AMT</th>
+                  <tr>
+                    <th>Date</th>
+                    <th>TIP</th>
+                    <th>COUNT</th>
+                    <th>AMT</th>
+                  </tr>
                 </thead>
                 <tbody>
-                  {details.map((detail) => (
-                    <tr key={detail.date}>
-                      <td>{detail.date}</td>
+                  {Object.entries(details.reduce((acc, detail) => {
+                    if (!acc[detail.date]) {
+                      acc[detail.date] = { ...detail };
+                    } else {
+                      acc[detail.date].amount += detail.amount;
+                      acc[detail.date].tip += detail.tip;
+                      acc[detail.date].count += detail.count;
+                    }
+                    return acc;
+                  }, {})).map(([date, detail]) => (
+                    <tr key={date}>
+                      <td>{date}</td>
                       <td>{Math.round(detail.tip)}</td>
                       <td>{detail.count}</td>
                       <td>{detail.amount}</td>
@@ -206,6 +225,12 @@ function Earning() {
                     <td></td>
                     <td></td>
                     <td>{estimate}</td>
+                  </tr>
+                  <tr>
+                    <td>Cash this Period</td>
+                    <td></td>
+                    <td></td>
+                    <td>({payCH})</td>
                   </tr>
                 </tfoot>
               </table>

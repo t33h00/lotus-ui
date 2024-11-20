@@ -6,19 +6,20 @@ import './SignUp.css';
 import { BASE_URL } from "../Service/Service";
 
 function SignUp() {
-  const [userFound, setUserFound] = useState(false);
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm();
   const SIGNUP_URL = BASE_URL + "api/save";
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [completed, setCompleted] = useState(false);
   const onSubmit = (data) => {
+    setLoading(!loading);
     try {
       axios.post(SIGNUP_URL, data).then((res) => {
         if (res.status === 201) {
-          setLoading(false);
+          setCompleted(true);
         }
       });
     } catch (error) {
@@ -33,7 +34,7 @@ function SignUp() {
           content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
         />
       </Helmet>
-      {loading ? (
+      {!loading ? (
         <div className="wrapper">
           <form onSubmit={handleSubmit(onSubmit)}>
             <div className="title">Registration</div>
@@ -95,8 +96,8 @@ function SignUp() {
                   {...register(
                     "password",
                     { required: true,
-                    pattern: /^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{6,}$/ } //(?=.*[@#$%^&+=])
-                  )}
+                    // pattern: /^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=]).{6,}$/ }
+                  })}
                 />
                 {errors.password?.type === "required" &&
                   "password is required!" && (
@@ -114,10 +115,13 @@ function SignUp() {
             </div>
           </form>
         </div>
-      ) : (
+      ) : completed ? (
         <div className="wrapper">
           <p>Please check your email to verify your account</p>
           <a href="/login">Login</a>
+        </div>
+      ) : (
+        <div className="loading">
         </div>
       )}
     </>

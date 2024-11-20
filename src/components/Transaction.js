@@ -4,7 +4,7 @@ import useLocalState from "./useLocalState";
 import axios from "axios";
 import { useReactToPrint } from "react-to-print";
 import "./Transaction.css";
-import { Navigate, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { BASE_URL } from "../Service/Service";
@@ -18,15 +18,14 @@ function Transaction() {
   const [details, setDetails] = useState([]);
   const [jwt, setJwt] = useLocalState("", "jwt");
   const [loading, setLoading] = useState(true);
-  const [payBy, setPayBy] = useState("CC");
+  const [by, setBy] = useState("CC");
   const mili = new Date().getTime() - 21600000;
   const today = new Date(mili).toJSON().slice(0, 10);
-  const [startDate, setStartDate] = useState(today || date);
-  console.log("From Transaction")
+  const [startDate, setStartDate] = useState(date? date : today);
 
   useEffect(() => {
       data();
-  }, [loading, startDate]);
+  }, [startDate]);
 
   let componentRef = useRef();
   const handlePrint = useReactToPrint({
@@ -36,6 +35,8 @@ function Transaction() {
         size: 72mm full portrait;
         margin: 0;
       }
+      .printBtn {
+        display: none !important;}
     }
     `
   });
@@ -46,7 +47,7 @@ function Transaction() {
       "Content-Type": "application/json",
     },
     params: {
-      date: date,
+      date: startDate,
     },
   };
 
@@ -85,7 +86,7 @@ function Transaction() {
     amount: "",
     tip: "",
     count: "",
-    payBy: payBy,
+    by: by,
     note: "",
     date: startDate,
   });
@@ -116,7 +117,7 @@ function Transaction() {
       amount: "",
       tip: "",
       count: "",
-      payBy: "CC",
+      by: "CC",
       note: "",
       date: startDate
     });
@@ -132,9 +133,13 @@ function Transaction() {
     .toFixed(1);
   var serviceTotal = details.reduce((accum, item) => accum + item.count, 0);
   let cashTotal = 0;
+  let venmo = 0;
   for (let i = 0; i < details.length; i++) {
-    if (details[i].payBy === "CH") {
+    if (details[i].by === "CH") {
       cashTotal += details[i].amount;
+    } else if (details[i].by ==="VE"){
+      // eslint-disable-next-line no-unused-vars
+      venmo += details[i].amount;
     }
   }
 
@@ -155,7 +160,6 @@ function Transaction() {
               type="text"
               className="input"
               name="name"
-              required
               onChange={(e) => handleChange(e)}
               value={transaction.name}
             />
@@ -164,11 +168,11 @@ function Transaction() {
             <div className="inputfield small-field">
               <div style={{ width: "55px" }} className="custom_select">
                 <select
-                  name="payBy"
-                  value={transaction.payBy}
+                  name="by"
+                  value={transaction.by}
                   onChange={(e) => {
                     handleChange(e);
-                    setPayBy(e.target.value);
+                    setBy(e.target.value);
                   }}
                 >
                   <option value="CC">CC</option>
@@ -244,24 +248,23 @@ function Transaction() {
               }}
               value="Save"
               className="btn"
+              disabled={!transaction.name || !transaction.amount || !transaction.count}
             />
           </div>
         </div>
       </div>
       {/* ----------------------------- */}
-      {total != 0 ? (
+      {total !== 0 ? (
         <>
-          <div style={{margin:"20px"}}> 
-            <button className="printBtn"
-              onClick={handlePrint}
-            >
-              Print
-            </button>
-          </div>
           <div style={{paddingBottom:"70px"}} className="wrapper" ref={componentRef}>
-            <div className="titleName">{user.firstName}</div>
+            <div className="titleName">
+              {user.firstName}
+              <button className="printBtn" style={{ float: "right" }} onClick={handlePrint}>
+                Print
+              </button>
+            </div>
             <div className="title">
-              <h5 style={{ fontWeight: "bold" }}>{startDate}</h5>
+              <h5 style={{ fontWeight: "bold" }}>{transaction.date}</h5>
             </div>
             <div className="content-table">
               <table className="customers">
@@ -279,7 +282,7 @@ function Transaction() {
                       <td  style={{fontWeight:"600"}} onDoubleClick={() => handleEdit(detail.id)}>
                         {(detail.name).toUpperCase()}
                       </td>
-                      {detail.payBy==="CH"?<td style={{fontWeight:"600"}}>{detail.payBy}</td>:<td>{detail.payBy}</td>}
+                      {detail.by==="CH"?<td style={{fontWeight:"600"}}>{detail.by}</td>:<td>{detail.by}</td>}
                       <td>{detail.amount}</td>
                       <td>{detail.tip}</td>
                       <td>{detail.count}</td>
@@ -293,8 +296,12 @@ function Transaction() {
                 <td>{total}</td>
                 <td>{tipTotal} </td>
                 <td>{serviceTotal}</td>
-                <td style={{ fontWeight: "bold" }}>Cash: {cashTotal}</td>
+                <td></td>
               </table>
+            </div>
+            <div style={{display:"flex", justifyContent:"center", padding:"5px"}}>
+                <div style={{margin:"auto", fontWeight:"bold"}}>Cash: {cashTotal}</div>
+                <div style={{margin:"auto", fontWeight:"bold"}}>Venmo: {venmo}</div>
             </div>
           </div>
         </>

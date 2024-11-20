@@ -3,13 +3,14 @@ import "./navibar.css";
 import useLocalState from "./useLocalState";
 import {Navigate, Link, useNavigate} from 'react-router-dom';
 import { BottomNavigation, BottomNavigationAction } from "@mui/material";
+import MuiBottomNavigationAction from "@mui/material/BottomNavigationAction";
 import EditNoteIcon from '@mui/icons-material/EditNote';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
+import { styled } from "@mui/material/styles";
 
 function Navibar(){
-    const [isOpen, setIsOpen] = useState(false);
     const [user,setUser] = useLocalState("","user")
     const [jwt,setJwt] = useLocalState("","jwt")
     const [userProfile,setUserProfile] = useLocalState("","userProfile");
@@ -42,7 +43,11 @@ function Navibar(){
               break;
           }};
     const handleTransaction = ()=> {
+        if(user !== null){
             navigate("/transaction/" + `${today}`);
+        } else {
+            navigate("/login");
+        }
     }
 
     const handleCalendar = ()=> {
@@ -76,32 +81,41 @@ function Navibar(){
             </div> */}
         </div>
         <div>
-            <BottomNavigation showLabels 
-            value={value}
-            onChange={handleNavigationChange}
-            sx={{
-                position: 'fixed', bottom: 0, left: 0, right: 0,
+            <BottomNavigation
+              showLabels
+              value={value}
+              onChange={handleNavigationChange}
+              sx={{
+                position: 'fixed',
+                justifyContent: 'center',
+                bottom: 0,
+                left: '50%',
+                transform: 'translateX(-50%)',
                 bgcolor: "white",
-                margin:'0px 20px 30px 20px',
-                borderRadius:'20px',
-                boxShadow:'0px 0px 20px 0px rgba(65, 39, 65, 0.47);',
-                height:'60px',
+                marginBottom: '30px',
+                borderRadius: '20px',
+                boxShadow: '0px 0px 20px 0px rgba(65, 39, 65, 0.47);',
+                height: '60px',
+                maxWidth: '550px',
+                width: '100%',
                 '& .Mui-selected': {
-                '& .MuiBottomNavigationAction-label': {
-                fontSize: theme => theme.typography.caption,
-                transition: 'ease-in-out',
-                fontWeight: 'bold',
-                lineHeight: '20px',
-                paddingBottom:'5px',    
-                },
-                '& .MuiSvgIcon-root, & .MuiBottomNavigationAction-label': {
-                color: "#5265c4"
-                }},
-                }}>
-                <BottomNavigationAction label="record" icon={<EditNoteIcon/>}/>
-                <BottomNavigationAction label="calendar" icon={<CalendarMonthIcon/>}/>
-                <BottomNavigationAction label="wage" icon={<AttachMoneyIcon/>}/>
-                <BottomNavigationAction label="profile" icon={<MoreHorizIcon/>}/>
+                  '& .MuiBottomNavigationAction-label': {
+                    fontSize: theme => theme.typography.caption,
+                    transition: 'ease-in-out',
+                    fontWeight: 'bold',
+                    lineHeight: '20px',
+                    paddingBottom: '5px',
+                  },
+                  '& .MuiSvgIcon-root, & .MuiBottomNavigationAction-label': {
+                    color: "#5265c4"
+                  }
+                }
+              }}
+            >
+              <BottomNavigationAction label="record" icon={<EditNoteIcon />} />
+              <BottomNavigationAction label="calendar" icon={<CalendarMonthIcon />} />
+              <BottomNavigationAction label="wage" icon={<AttachMoneyIcon />} />
+              <BottomNavigationAction label="profile" icon={<MoreHorizIcon />} />
             </BottomNavigation>
         </div>
         </>
