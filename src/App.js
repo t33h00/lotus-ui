@@ -22,8 +22,6 @@ import "bootstrap/dist/js/bootstrap.bundle.min";
 function App() {
   const [user,setUser] = useLocalState("","user");
   const mili = new Date().getTime() - 21600000;
-  const today = new Date(mili).toJSON().slice(0, 10);
-  const role = user.authorities;
   return(
     <>
       <BrowserRouter>
