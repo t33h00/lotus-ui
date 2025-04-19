@@ -140,20 +140,10 @@
   width: 100%;
 }
 
-.printBtn {
-  color: #2E4374;
-  background: white;
-  padding: 5px 20px;
-  border-radius: 10px;
-  border: 1px solid #2E4374;
-  font-size: 12px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  outline: none;
-}
-
-.printBtn:hover {
-  background-color: #f0f0f0;
+.customers td,
+.customers th {
+  border: 1px solid #000000;
+  padding: 8px;
 }
 
 

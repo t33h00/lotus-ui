@@ -16,60 +16,61 @@ const payType = [
 ]
 
 function EditTransaction() {
-    const TRANSACTION_URL = BASE_URL + "api/transaction";
-    const UPDATE_URL = BASE_URL + "api/edittransaction";
-    const DELETE_URL = BASE_URL + "api/deletetransaction";
+    const TRANSACTION_URL = BASE_URL + "user/transaction";
+    const UPDATE_URL = BASE_URL + "user/edittransaction";
+    const DELETE_URL = BASE_URL + "user/deletetransaction";
     const { id } = useParams();
     const navigate = useNavigate();
-    const [jwt, setJwt] = useLocalState("", "jwt");
-    const config = {
-        headers: {Authorization: `Bearer ${jwt}`, 'Content-Type': "application/json"}};
-
     const[transaction,setTransaction] = useState([])
     
+    let config = {
+      params: {
+          id: id
+      },
+      withCredentials: true
+      }
+
     const fetchData = async () => {
-      let config = {
-          headers: {Authorization: `Bearer ${jwt}`, 'Content-Type': "application/json"},
-          params: {
-              id: id
-          }
-          }
-      await axios.get(TRANSACTION_URL, config)
+      try{
+        await axios.get(TRANSACTION_URL, config)
                   .then((res)=>{
                     setTransaction(res.data);
                   });
-                  }
-    useEffect(()=>{
-      fetchData();
-      },[]);
+                  } catch(error){
+                    alert("Session Expired! Please login again.")
+                    navigate("/login")
+                  }}
+        useEffect(()=>{
+          fetchData();
+        },[]);
 
   const editTransaction = async () =>{
-    try{  await axios.put(UPDATE_URL,transaction,config)
-        .then((res)=>console.log(res.data));
+    try{  await axios.put(UPDATE_URL,transaction,config);
         navigate(-1);
     }catch(error){
-        console.log(error)
+        alert("Session Expired! Please login again.")
+        navigate("/login")
     }
   }
 
   const deleteTransaction = async () =>{
     let config = {
-        headers: {Authorization: `Bearer ${jwt}`, 'Content-Type': "application/json"},
         params: {
             id: id
-        }
+        },
+        withCredentials: true
     }
     try{  await axios.delete(DELETE_URL,config);
         navigate(-1);
     }catch(error){
-        console.log(error)
+        alert("Session Expired! Please login again.")
+        navigate("/login")
     }
   }
 
   const handleChange = (e) => {
         let value = e.target.value;
         setTransaction({...transaction, [e.target.name]:value})
-        console.log(transaction)
   
   };
 
@@ -95,10 +96,9 @@ function EditTransaction() {
           <div className="small-box" style={{display:"flex"}}>
             <div className="inputfield small-field">
               <div style={{ width: "75px" }} className="custom_select">
-                <select name="payBy"
+                <select name="by" value={transaction.by}
                   onChange={(e) => { handleChange(e);}}
                 >
-                  <option >Select</option>
                   <option value="CC">CC</option>
                   <option value="CH">CH</option>
                   <option value="VE">VE</option>

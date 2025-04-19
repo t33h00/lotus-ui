@@ -1,100 +1,117 @@
-import React from "react";
-import { useState } from 'react';
+import React, { useState } from "react";
 import axios from "axios";
 import useLocalState from "./useLocalState";
 import { Helmet } from "react-helmet-async";
 import { BASE_URL } from "../Service/Service";
-import './Login.css';
+import { useNavigate } from "react-router-dom";
+import "./Login.css";
 
 function Login() {
-  const [user, setUser] = useLocalState("", "user");
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [jwt, setJwt] = useLocalState("", "jwt");
-  const role = user.authorities;
-  const [loading, setLoading] = useState(true);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const navigate = useNavigate();
   const [invalid, setInvalid] = useState(false);
-  const mili = new Date().getTime() - 21600000;
-  const today = new Date(mili).toJSON().slice(0, 10);
+  const [loading, setLoading] = useState(false);
+  const [user, setUser] = useLocalState("", "user");
+
   const LOGIN_URL = BASE_URL + "auth/login";
 
-  const requestBody = {
-    email: email,
-    password: password
-  };
-
-  const headers = {
-    'Content-Type': 'application/json',
-    'Access-Control-Expose-Headers': 'Authorization'
-  };
-
-  const login = async () => {
-    try {
-      await axios.post(LOGIN_URL, requestBody, {
-        headers: headers
-      }).then((res) => {
-        const auth = res.headers['authorization'];
-        setJwt(auth);
-        setUser(res.data);
-        setLoading(false);
-      });
-    } catch (error) {
-      setInvalid(true);
-      console.log(error);
-    }
-  };
-
-  if (!loading) {
-    role === '[ROLE_USER]' ? (window.location.href = "/transaction/" + `${today}`) : window.location.href = "/employeelist";
-  }
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    login();
+    setLoading(true);
+    setInvalid(false);
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setInvalid("Please enter a valid email address.");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        LOGIN_URL,
+        { email, password },
+        { withCredentials: true }
+      );
+      if (response.status === 200 && response.data) {
+        setUser(response.data); // Persist user data dynamically
+
+        // Delay navigation until user state is updated
+        setTimeout(() => {
+          if (user) {
+            navigate("/transaction");
+          } else {
+            setInvalid("Unexpected error. Please try again.");
+          }
+        }, 100); // Small delay to ensure state update
+      } else if (response.status === 401) {
+        setInvalid("Invalid email or password. Please try again.");
+      } else {
+        setInvalid("Unexpected error. Please try again.");
+      }
+    } catch (error) {
+      if (error.code === "ERR_NETWORK") {
+        setInvalid("System down. Please contact support.");
+      } else if(error.code === "ERR_BAD_REQUEST") {
+        setInvalid("Invalid email or password. Please try again.");
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <>
       <Helmet>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+        />
       </Helmet>
-      
+
       <section className="login">
-        <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
-          <a href="#" className="flex items-center mb-6 text-2xl font-semibold text-white">
-            Lotus Booking
-          </a>
-          <div className="bg-white w-full rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0 dark:border-gray-700">
-            <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
-              <h1 className="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl">
-                Sign in to your account
-              </h1>
-              <form className="space-y-4 md:space-y-6" onSubmit={handleSubmit}>
-              <div className="invalid">
-                    {!invalid ? "" : (<p style={{ color: "red" }}>Invalid credentials</p>)}
-              </div>
-                <div>
-                  <label htmlFor="email" className="block mb-2 text-sm font-medium text-gray-900 ">Your email</label>
-                  <input type="email" name="email" id="email" onChange={(e) => setEmail(e.target.value)}
-                    className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 "
-                    placeholder="name@company.com" required=""></input>
-                </div>
-                <div>
-                  <label htmlFor="password" className="block mb-2 text-sm font-medium text-gray-900">Password</label>
-                  <input type="password" name="password" id="password" onChange={(e) => setPassword(e.target.value)}
-                    className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
-                    required=""></input>
-                </div>
-                <button type="submit"
-                  id="submit"
-                  className="w-full text-black bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 ">
-                  Sign in</button>
-                <p className="text-sm font-light text-gray-500 dark:text-gray-400">
-                  Don’t have an account yet? <a href="/signup" className="font-medium text-primary-600 hover:underline dark:text-primary-500">Sign up</a>
-                </p>
-              </form>
+        <p className="login-title">Lotus Booking</p>
+        <div className="login-card">
+          <h1 className="login-heading">Sign in to your account</h1>
+          <form className="login-form" onSubmit={handleSubmit}>
+            <div className="invalid">
+              {invalid && <p>{invalid}</p>}
             </div>
-          </div>
+            <div>
+              <label htmlFor="email">Your email</label>
+              <input
+                type="email"
+                name="email"
+                id="email"
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="name@company.com"
+                required
+              />
+            </div>
+            <div>
+              <label htmlFor="password">Password</label>
+              <input
+                type="password"
+                name="password"
+                id="password"
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
+            <div className="flex items-center justify-between space-x-2">
+              <button type="submit" className="login-button" disabled={loading}>
+                {loading ? "Signing in..." : "Sign in"}
+              </button>
+              <a style={{textDecoration:"none"}} href="/email" className="login-button">
+                Forgot
+              </a>
+            </div>
+            <p className="login-link">
+              Don’t have an account yet?{" "}
+              <a href="/signup">Sign up</a>
+            </p>
+          </form>
         </div>
       </section>
     </>

@@ -1,31 +1,49 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { useForm } from "react-hook-form";
 import axios from "axios";
 import './SignUp.css';
+import "./Login.css";
+import {useNavigate} from 'react-router-dom';
 import { BASE_URL } from "../Service/Service";
 
 function SignUp() {
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm();
-  const SIGNUP_URL = BASE_URL + "api/save";
+  const SIGNUP_URL = BASE_URL + "user/save";
   const [loading, setLoading] = useState(false);
   const [completed, setCompleted] = useState(false);
-  const onSubmit = (data) => {
-    setLoading(!loading);
+  const navigate = useNavigate();
+  const [passwordMatch, setPasswordMatch] = useState(true);
+
+  const onSubmit = async (data) => {
+    setLoading(true);
     try {
-      axios.post(SIGNUP_URL, data).then((res) => {
-        if (res.status === 201) {
-          setCompleted(true);
-        }
-      });
+      const response = await axios.post(SIGNUP_URL, data);
+      if (response.status === 201 || response.status === 200) {
+        setCompleted(true);
+      }
     } catch (error) {
-      console.log(error.AxiosError)
+      if(error.response.status === 302){
+        alert("Email already exists");
+        navigate("/login");
+      }
     }
   };
+
+  useEffect(() => {
+    const subscription = watch((value, { name }) => {
+      if (name === "password" || name === "confirmPassword") {
+        setPasswordMatch(value.password === value.confirmPassword);
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [watch]);
+
   return (
     <>
       <Helmet>
@@ -35,82 +53,74 @@ function SignUp() {
         />
       </Helmet>
       {!loading ? (
-        <div className="wrapper">
+        <div className="wrapper" style={{ maxWidth:"450px", borderRadius:"5px" }}>
           <form onSubmit={handleSubmit(onSubmit)}>
             <div className="title">Registration</div>
-            <div className="form" >
+            <div className="form">
               <div className="inputfields">
                 <label>Email</label>
                 <input
                   type="text"
                   className="input"
                   {...register("email", {
-                    required: true,
-                    pattern: /^[^@ ]+@[^@ ]+\.[^@ .]{2,}$/,
+                    required: "Email is required",
+                    pattern: {
+                      value: /^[^@ ]+@[^@ ]+\.[^@ .]{2,}$/,
+                      message: "Email is not valid",
+                    },
                   })}
                 />
-                {errors.email?.type === "required" && "Email is required!" && (
-                  <p className="errorMsg">
-                    Email is required.
-                  </p>
-                )}
-                {errors.email?.type === "pattern" && (
-                  <p className="errorMsg" >Email is not valid.</p>
-                )}
+                {errors.email && <p className="errorMsg">{errors.email.message}</p>}
               </div>
               <div className="inputfields">
                 <label>First Name</label>
                 <input
                   type="text"
                   className="input"
-                  {...register("firstName", { required: true })}
+                  {...register("firstName", { required: "First name is required" })}
                 />
-                {errors.firstName?.type === "required" &&
-                  "Email is required!" && (
-                    <p className="errorMsg">
-                      First name is required.
-                    </p>
-                  )}
+                {errors.firstName && <p className="errorMsg">{errors.firstName.message}</p>}
               </div>
               <div className="inputfields">
                 <label>Last Name</label>
                 <input
                   type="text"
                   className="input"
-                  {...register("lastName", { required: true })}
+                  {...register("lastName", { required: "Last name is required" })}
                 />
-                {errors.lastName?.type === "required" &&
-                  "Last name is required!" && (
-                    <p
-                      className="errorMsg"
-                    >
-                      Last name is required.
-                    </p>
-                  )}
+                {errors.lastName && <p className="errorMsg">{errors.lastName.message}</p>}
               </div>
               <div className="inputfields">
                 <label>Password</label>
                 <input
                   type="password"
                   className="input"
-                  {...register(
-                    "password",
-                    { required: true,
-                    // pattern: /^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=]).{6,}$/ }
+                  {...register("password", {
+                    required: "Password is required",
+                    // pattern: {
+                    //   value: /^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=]).{6,}$/,
+                    //   message: "Password must be min 6 and contain at least 1 uppercase, 1 lowercase, and 1 digit",
+                    // },
                   })}
                 />
-                {errors.password?.type === "required" &&
-                  "password is required!" && (
-                    <p className="errorMsg">
-                      Password is required
-                    </p>
-                  )}
-                  {errors.password?.type === "pattern" && (
-                  <p className="errorMsg" >password must be min 6 and containing at least 1 uppercase, 1 lowercase, and 1 digit.</p>
-                )}
+                {errors.password && <p className="errorMsg">{errors.password.message}</p>}
+              </div>
+              <div className="inputfields">
+                <label>Confirm Password</label>
+                <input
+                  type="password"
+                  className="input"
+                  {...register("confirmPassword", {
+                    required: "Confirm password is required",
+                    validate: (value) =>
+                      value === watch("password") || "Passwords do not match",
+                  })}
+                />
+                {errors.confirmPassword && <p className="errorMsg">{errors.confirmPassword.message}</p>}
+                {!passwordMatch && <p className="errorMsg">Passwords do not match</p>}
               </div>
               <div className="inputfield">
-                <button className="btn" type="submit">Submit</button>
+                <button className="login-button" style={{width:"100%"}} type="submit" disabled={loading}>Submit</button>
               </div>
             </div>
           </form>
@@ -121,10 +131,10 @@ function SignUp() {
           <a href="/login">Login</a>
         </div>
       ) : (
-        <div className="loading">
-        </div>
+        <div className="loading"></div>
       )}
     </>
   );
 }
+
 export default SignUp;

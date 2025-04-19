@@ -7,17 +7,13 @@ import { Helmet } from "react-helmet-async";
 import { BASE_URL } from "../Service/Service";
 
 function Earning() {
-  const CUSTOM_DATE_URL = BASE_URL + "api/customdate";
-  const ADMIN_CUSTOM_DATE_URL = BASE_URL + "api/admin/customdate";
+  const CUSTOM_DATE_URL = BASE_URL + "user/customdate";
 
   const [user, setUser] = useLocalState("", "user");
-  const [jwt, setJwt] = useLocalState("", "jwt");
   const [date1, setDate1] = useState(new Date().toLocaleDateString('en-CA'));
   const [date2, setDate2] = useState(new Date().toLocaleDateString('en-CA'));
   const [details, setDetails] = useState([]);
-  const [userProfile, setUserProfile] = useLocalState("", "userProfile");
   const [rate, setRate] = useState(60);
-  let role = user.authorities;
 
   let componentRef = useRef();
   const handlePrint = useReactToPrint({
@@ -32,50 +28,23 @@ function Earning() {
     }
     `
   });
+  let config = {
+    params: {
+      date1: date1,
+      date2: date2,
+    },
+    withCredentials: true
+  };
+
+  const data = async () => {
+    await axios
+      .get(CUSTOM_DATE_URL, config)
+      .then((res) => {setDetails(res.data)});}
 
   useEffect(() => {
-    if (role === "[ROLE_USER]") {
-      let config = {
-        headers: {
-          Authorization: `Bearer ${jwt}`,
-          "Content-Type": "application/json",
-        },
-        params: {
-          date1: date1,
-          date2: date2,
-        },
-      };
-
-      const data = async () => {
-        await axios
-          .get(CUSTOM_DATE_URL, config)
-          .then((res) => {setDetails(res.data)});
-          
-      };
       data();
-    } else if (role === "[ROLE_ADMIN]") {
-      {
-        let config = {
-          headers: {
-            Authorization: `Bearer ${jwt}`,
-            "Content-Type": "application/json",
-          },
-          params: {
-            user_id: userProfile.id,
-            date1: date1,
-            date2: date2,
-          },
-        };
-
-        const data = async () => {
-          await axios
-            .get(ADMIN_CUSTOM_DATE_URL, config)
-            .then((res) => setDetails(res.data));
-        };
-        data();
-      }
-    }
-  }, [date1, date2, userProfile]);
+    } 
+  , [date1, date2]); // Ensure no conflicting variable names
 
   var total = details.reduce((accum, item) => accum + item.amount, 0);
   var counts = details.reduce((accum, item) => accum + item.count, 0);
@@ -90,7 +59,8 @@ function Earning() {
       return accum;
     }
   }, 0);
-  const fullName = user.firstName + " " + user.lastName;
+  const fullName = user?.firstName + " " + user?.lastName;
+
   return (
     <>
       <Helmet>
@@ -132,6 +102,7 @@ function Earning() {
               className="input"
               onChange={(e) => setRate(e.target.value)}
             >
+              <option value={50}>50</option>
               <option value={60}>60</option>
               <option value={70}>70</option>
               <option value={80}>80</option>
@@ -147,12 +118,8 @@ function Earning() {
           <div className="receipt_header">
             <h1>
               Receipt of Labor{" "}
-              {role === "[ROLE_USER]" ? (
-                <span>{fullName}</span>
-              ) : (
-                <span>{userProfile.firstName}</span>
-              )}
-            </h1>
+              <span>{fullName}</span>
+              </h1>
           </div>
 
           <div className="receipt_body">

@@ -65,3 +65,28 @@ th {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+
+.button-same-size:disabled {
+  background: #d5dbd9;
+  cursor: not-allowed;
+}
+
+.printBtn {
+  color: #ffffff;
+  font-size: 10px;
+  cursor: pointer;
+  background: #2c73ec;
+  border-radius: 5px;
+  outline: none;
+}
+
+.button-same-size {
+  width: 60px; /* Adjust the width as needed */
+  height: 25px; /* Adjust the height as needed */
+}
+
+.table-header {
+  background-color: #75a1fa;
+  font-weight: bold;
+  color: #fff;
+}
