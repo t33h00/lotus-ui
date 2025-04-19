@@ -1,0 +1,46 @@
+.reset-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.resetfields {
+  display: flex;
+  gap: 10px;
+}
+
+.resetinput {
+  width: 40px;
+  height: 40px;
+  text-align: center;
+  font-size: 18px;
+  border: 1px solid #d5dbd9;
+  border-radius: 3px;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.input:focus {
+  border: 1px solid #fec107;
+}
+
+.submit-btn {
+  width: 40px;
+  height: 40px;
+  font-size: 18px;
+  border: 1px solid #d5dbd9;
+  border-radius: 3px;
+  background-color: #fff;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.submit-btn:hover {
+  background-color: #f0f0f0;
+}
+
+.submit-btn:focus {
+  border: 1px solid #fec107;
+}
