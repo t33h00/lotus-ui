@@ -24,14 +24,14 @@ function App() {
         <Navibar />
         <HelmetProvider>
           <Routes>
-            <Route path="*" element={<PrivateRoute><Transaction /></PrivateRoute>}></Route>
-            <Route path="/transaction/:date" element={<PrivateRoute><Transaction /></PrivateRoute>}></Route>
-            <Route index element={<PrivateRoute><Transaction /></PrivateRoute>}></Route>
-            <Route path='/user' element={<PrivateRoute> <User /> </PrivateRoute>} />
-            <Route path='/earning' element={<PrivateRoute><Earning /></PrivateRoute>}></Route>
-            <Route path='/calendarview' element={<PrivateRoute><CalendarView /></PrivateRoute>} />
-            <Route path='/calviewdetail' element={<PrivateRoute><CalViewDetail /></PrivateRoute>} />
-            <Route path='/edittransaction/:id' element={<PrivateRoute><EditTransaction /></PrivateRoute>} />
+            <Route path="*" element={<Transaction />}></Route>
+            <Route path="/transaction/:date" element={<Transaction />}></Route>
+            <Route index element={<Transaction />}></Route>
+            <Route path='/user' element={ <User /> } />
+            <Route path='/earning' element={<Earning />}></Route>
+            <Route path='/calendarview' element={<CalendarView />} />
+            <Route path='/calviewdetail' element={<CalViewDetail />} />
+            <Route path='/edittransaction/:id' element={<EditTransaction />} />
             <Route path='/login' element={<Login />}></Route>
             <Route path='/reset' element={<Reset />}></Route>
             <Route path='/email' element={<Email />}></Route>

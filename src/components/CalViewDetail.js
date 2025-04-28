@@ -6,6 +6,7 @@ import { Helmet } from "react-helmet-async";
 import { BASE_URL } from "../Service/Service";
 import React from "react";
 import { useReactToPrint } from "react-to-print";
+import PrivateRoute from "./PrivateRoute";
 
 function CalViewDetail({ date, updateReport}) {
   const TRANSACTION_URL = BASE_URL + "user/findbydate";
@@ -187,7 +188,7 @@ function CalViewDetail({ date, updateReport}) {
               </div>
             </div>
             <div className="title">
-              <h5 style={{ fontWeight: "bold" }}>{convertDate}</h5>
+              <h5 style={{ fontWeight: "400", fontSize:"24px" }}>{convertDate}</h5>
             </div>
             <div className="content-table">
               <table className="customers">
@@ -204,7 +205,7 @@ function CalViewDetail({ date, updateReport}) {
                 <tbody>
                   {details.map((detail) => (
                     <tr key={detail.id}>
-                      <td style={{ fontWeight: "600" }} onDoubleClick={() => handleEdit(detail.id)}>
+                      <td style={{ fontWeight: "400" }} onDoubleClick={() => handleEdit(detail.id)}>
                         {detail.name.toUpperCase()}
                       </td>
                       {detail.by === "CH" ? <td style={{ fontWeight: "600" }}>{detail.by}</td> : <td>{detail.by}</td>}
@@ -238,4 +239,4 @@ function CalViewDetail({ date, updateReport}) {
   );
 }
 
-export default CalViewDetail;
+export default PrivateRoute(CalViewDetail, true);

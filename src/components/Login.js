@@ -5,6 +5,7 @@ import { Helmet } from "react-helmet-async";
 import { BASE_URL } from "../Service/Service";
 import { useNavigate } from "react-router-dom";
 import "./Login.css";
+import logo from "../image/text.png";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -71,7 +72,7 @@ function Login() {
       </Helmet>
 
       <section className="login">
-        <p className="login-title">Lotus Booking</p>
+        {/* <img  src={logo} alt="Logo" className="login-logo" /> */}
         <div className="login-card">
           <h1 className="login-heading">Sign in to your account</h1>
           <form className="login-form" onSubmit={handleSubmit}>

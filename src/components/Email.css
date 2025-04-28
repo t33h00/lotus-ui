@@ -13,8 +13,8 @@
 }
 
 .title-email {
-    font-size: 20px;
-    font-weight: 700;
+    font-size: 18px;
+    font-weight: 400;
     margin: 10px auto;
     color: #2E4374;
     text-transform: uppercase;
@@ -24,10 +24,9 @@
 .input-email {
     width: 100%;
     outline: none;
-    border: 1px solid #d5dbd9;
+    border-bottom: 1px solid #cacaca;
     font-size: 15px;
     padding: 10px;
-    border-radius: 3px;
     transition: all 0.3s ease;
     margin-bottom: 20px;
 }

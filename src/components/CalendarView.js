@@ -12,6 +12,7 @@ import "./CalendarView.css";
 import { Helmet } from "react-helmet-async";
 import { BASE_URL } from "../Service/Service";
 import { useNavigate } from "react-router-dom";
+import PrivateRoute from "./PrivateRoute";
 
 function CalendarView() {
   const FINDALL_URL = BASE_URL +  "user/calendarview";
@@ -139,7 +140,7 @@ function CalendarView() {
           style={{ height: 350, margin: "20px"}}
           eventPropGetter={eventStyleGetter}
         />
-        <div style={{textAlign:"center"}}>
+        <div className="total">
         Total this month: {total}
         </div>
       </div>
@@ -150,4 +151,4 @@ function CalendarView() {
   );
 }
 
-export default CalendarView;
+export default PrivateRoute(CalendarView, true);

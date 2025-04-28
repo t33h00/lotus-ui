@@ -2,10 +2,10 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import "./Transaction.css";
 import axios from "axios";
-import useLocalState from "./useLocalState";
 import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { BASE_URL } from "../Service/Service";
+import PrivateRoute from "./PrivateRoute";
 
 const payType = [
   {value: "CH", label:"CH"},
@@ -189,4 +189,4 @@ function EditTransaction() {
   );
 }
 
-export default EditTransaction;
+export default PrivateRoute(EditTransaction, true);

@@ -49,13 +49,11 @@ export const requestForToken = async (user) => {
         });
 
         if (currentToken) {
-            console.log('FCM Token:', currentToken);
-
-            // Check if the token is already saved in localStorage
-            // const savedToken = localStorage.getItem('fcm_token');
-            // if (savedToken === currentToken) {
-            //     return;
-            // }
+            //Check if the token is already saved in localStorage
+            const savedToken = localStorage.getItem('fcm_token');
+            if (savedToken === currentToken) {
+                return;
+            }
 
             // Prepare the payload
             const sub = {

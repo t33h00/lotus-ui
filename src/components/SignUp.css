@@ -67,18 +67,6 @@
   border-radius: 2px;
 }
 
-
-.wrapper .form .inputfields .input:focus,
-.wrapper .form .inputfields .textarea:focus,
-.wrapper .form .inputfields .custom_select select:focus{
-  border: 1px solid #fec107;
-}
-
-.wrapper .form .inputfields p{
-   font-size: 10px;
-   color: red;
-}
-
 .wrapper .form .inputfields .btn{
   width: 100%;
   margin-top: 5px;

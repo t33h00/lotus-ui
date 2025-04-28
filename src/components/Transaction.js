@@ -9,6 +9,7 @@ import { useParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { BASE_URL } from "../Service/Service";
 import { requestForToken } from "./firebase";
+import PrivateRoute from "./PrivateRoute";
 
 function Transaction() {
   const TRANSACTION_URL = BASE_URL + "user/findbydate";
@@ -75,6 +76,7 @@ function Transaction() {
         setDetails(response.data);
       }
     } catch (error) {
+      console.log("error: ", error);
       alert("Session Expired! Please login again.");
       navigate("/login");
     }
@@ -271,13 +273,13 @@ function Transaction() {
         <>
           <div style={{ paddingBottom: "70px" }} className="wrapper" ref={componentRef}>
             <div className="titleName">
-              {user.firstName}
+              {(user.firstName).toUpperCase()}
               <button className="printBtn button-same-size" style={{ float: "right" }} onClick={handlePrint}>
                 Print
               </button>
             </div>
             <div className="title">
-              <h5 style={{ fontWeight: "bold" }}>{transaction.date}</h5>
+              <h5 style={{ fontWeight: "400", fontSize:"24px" }}>{transaction.date}</h5>
             </div>
             <div className="content-table">
               <table className="customers">
@@ -294,7 +296,7 @@ function Transaction() {
                 <tbody>
                   {details.map((detail) => (
                     <tr key={detail.name}>
-                      <td style={{ fontWeight: "600"}} onDoubleClick={() => handleEdit(detail.id)}>
+                      <td style={{ fontWeight: "500"}} onDoubleClick={() => handleEdit(detail.id)}>
                         {detail.name.toUpperCase()}
                       </td >
                       {detail.by === "CH" ? <td style={{ fontWeight: "600" }}>{detail.by}</td> : <td >{detail.by}</td>}
@@ -308,7 +310,7 @@ function Transaction() {
                 </tbody>
                 <tbody>
                   <tr>
-                    <td style={{ fontWeight: "bold" }}>Total:</td>
+                    <td style={{ fontWeight: "500" }}>TOTAL:</td>
                     <td></td>
                     <td>{total}</td>
                     <td>{tipTotal}</td>
@@ -319,8 +321,8 @@ function Transaction() {
               </table>
             </div>
             <div style={{ display: "flex", justifyContent: "center", padding: "5px" }}>
-              <div style={{ margin: "auto", fontWeight: "bold" }}>Cash: {cashTotal}</div>
-              <div style={{ margin: "auto", fontWeight: "bold" }}>Venmo: {venmo}</div>
+              <div style={{ margin: "auto", fontWeight: "500" }}>Cash: {cashTotal}</div>
+              <div style={{ margin: "auto", fontWeight: "500" }}>Venmo: {venmo}</div>
             </div>
           </div>
         </>
@@ -331,4 +333,4 @@ function Transaction() {
   );
 }
 
-export default Transaction;
+export default PrivateRoute(Transaction, true);

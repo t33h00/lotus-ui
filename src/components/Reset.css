@@ -21,10 +21,6 @@
   transition: all 0.3s ease;
 }
 
-.input:focus {
-  border: 1px solid #fec107;
-}
-
 .submit-btn {
   width: 40px;
   height: 40px;
@@ -39,8 +35,4 @@
 
 .submit-btn:hover {
   background-color: #f0f0f0;
-}
-
-.submit-btn:focus {
-  border: 1px solid #fec107;
 }

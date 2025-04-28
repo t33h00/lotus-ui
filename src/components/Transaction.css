@@ -2,7 +2,7 @@
 
 .wrapper .title {
   font-size: 24px;
-  font-weight: 700;
+  font-weight: 400;
   margin: 10px auto;
   color: #2E4374;
   text-transform: uppercase;
@@ -10,8 +10,8 @@
 }
 
 .wrapper .titleName {
-  font-size: 20px;
-  font-weight: bold;
+  font-size: 25px;
+  font-weight: 500;
   margin: auto 20px;
   display: flex;
   justify-content: space-between;
@@ -50,11 +50,12 @@
 .wrapper .form .inputfield .textarea {
   width: 100%;
   outline: none;
-  border: 1px solid #d5dbd9;
+  /* border: 1px solid #d5dbd9; */
   font-size: 15px;
   padding: 4px 5px;
-  border-radius: 3px;
+  /* border-radius: 3px; */
   transition: all 0.3s ease;
+  border-bottom: 1px solid rgb(200, 197, 197);
 }
 
 .wrapper .form .inputfield .textarea {
@@ -72,7 +73,7 @@
   top: 12px;
   right: 10px;
   border: 8px solid;
-  border-color: #d5dbd9 transparent transparent transparent;
+  border-color: #eceeee transparent transparent transparent;
   pointer-events: none;
 }
 
@@ -86,14 +87,7 @@
   border: 0;
   padding: 4px 5px;
   font-size: 14px;
-  border: 1px solid #d5dbd9;
   border-radius: 2px;
-}
-
-.wrapper .form .inputfield .input:focus,
-.wrapper .form .inputfield .textarea:focus,
-.wrapper .form .inputfield .custom_select select:focus {
-  border: 1px solid #fec107;
 }
 
 .wrapper .form .inputfield p {
@@ -110,12 +104,8 @@
   background: #2E4374;
   color: #fff;
   cursor: pointer;
-  border-radius: 3px;
+  border-radius: 30px;
   outline: none;
-}
-
-.wrapper .form .inputfield .btn:hover {
-  background: #4F709C;
 }
 
 .wrapper .form .inputfield:last-child {
@@ -142,8 +132,32 @@
 
 .customers td,
 .customers th {
-  border: 1px solid #000000;
-  padding: 8px;
+  border-bottom: 1px solid rgb(200, 197, 197);
+  padding: 12px;
 }
 
+.editable-input {
+  width: 100%; /* Ensure the input takes the full width of the cell */
+  border: none; /* Remove default border */
+  outline: none; /* Remove focus outline */
+  background: transparent; /* Ensure background matches the table */
+  font-size: 14px; /* Match the font size with the table */
+  padding: 4px; /* Add padding for better spacing */
+  box-sizing: border-box; /* Include padding in width calculation */
+}
+
+.editable-input:focus {
+  border-bottom: 1px solid #000; /* Highlight underline on focus */
+}
+
+/* Optional: Style for editable-select if needed */
+.editable-select {
+  width: 100%; /* Ensure the select fits the cell */
+  border: none; /* Remove default border */
+  outline: none; /* Remove focus outline */
+  background: transparent; /* Match the table background */
+  font-size: 14px; /* Match font size */
+  padding: 4px; /* Add padding */
+  box-sizing: border-box; /* Include padding in width calculation */
+}
 

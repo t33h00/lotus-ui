@@ -34,7 +34,7 @@ function Navibar() {
       <div className="Navbar">
         <span className="nav-logo">
           <a style={{ fontSize: "20px" }} href={`/transaction/${today}`}>
-            Lotus
+            <img src={require("../image/text.png")} alt="Logo" style={{width:"50px"}} />
           </a>
         </span>
         <div className="nav-logo">

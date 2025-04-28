@@ -1,6 +1,7 @@
 import React, { useContext } from "react";
 import useLocalState from "./useLocalState";
 import "./Transaction.css";
+import PrivateRoute from "./PrivateRoute";
 
 function User() {
   const [user, setUser] = useLocalState("", "user");
@@ -23,4 +24,4 @@ function User() {
   );
 }
 
-export default User;
+export default PrivateRoute(User,true);

@@ -5,10 +5,10 @@ import "./Earning.css";
 import { useReactToPrint } from "react-to-print";
 import { Helmet } from "react-helmet-async";
 import { BASE_URL } from "../Service/Service";
+import PrivateRoute from "./PrivateRoute";
 
 function Earning() {
   const CUSTOM_DATE_URL = BASE_URL + "user/customdate";
-
   const [user, setUser] = useLocalState("", "user");
   const [date1, setDate1] = useState(new Date().toLocaleDateString('en-CA'));
   const [date2, setDate2] = useState(new Date().toLocaleDateString('en-CA'));
@@ -212,4 +212,4 @@ function Earning() {
   );
 }
 
-export default Earning;
+export default PrivateRoute(Earning, true);
