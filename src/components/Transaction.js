@@ -1,5 +1,4 @@
-import React from "react";
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import useLocalState from "./useLocalState";
 import axios from "axios";
 import { useReactToPrint } from "react-to-print";
@@ -10,11 +9,12 @@ import { Helmet } from "react-helmet-async";
 import { BASE_URL } from "../Service/Service";
 import { requestForToken } from "./firebase";
 import PrivateRoute from "./PrivateRoute";
+import printIcon from "../image/printer.svg"; // Correctly import the print.svg file
 
 function Transaction() {
   const TRANSACTION_URL = BASE_URL + "user/findbydate";
   const SAVE_TRANSACTION = BASE_URL + "user/transaction";
-  const [user,setUser] = useLocalState("", "user");
+  const [user, setUser] = useLocalState("", "user");
   const { date } = useParams();
   const navigate = useNavigate();
   const [details, setDetails] = useState([]);
@@ -31,34 +31,35 @@ function Transaction() {
     data();
   }, [startDate, user]);
 
-  // if (navigator.userAgent.includes("Macintosh" && "Chrome")) {
-  //   console.log("Mac Chrome!");
-  // } else if (navigator.userAgent.includes("Macintosh" && "Safari")) {
-  //   console.log("Mac Safari!");
-  // }
-
   let componentRef = useRef();
   const handlePrint = useReactToPrint({
     content: () => componentRef.current,
     pageStyle: `
       @media print {
         @page {
-          size: 72mm auto; /* Set the page size for thermal printers */
-          margin: 0; /* Remove default margins */
+          size: 72mm auto;
+          margin: 0;
         }
         body {
-          -webkit-print-color-adjust: exact; /* Ensure colors are printed accurately */
-          margin: 0; /* Remove body margin */
+          -webkit-print-color-adjust: exact;
+          margin: 0;
+          font-family: Lucida Console;
+          font-size: 11px;
+          line-height: 1.2;
+          color: #000;
+          font-weight: 700;
         }
         .printBtn, .non-printable {
-          display: none !important; /* Hide non-printable elements */
+          display: none !important;
         }
-        .table-header {
-          display: none; /* Hide table headers if not needed */
-        }
-        .customers {
-          width: 100%; /* Ensure table fits the page */
-          font-size: 12px; /* Adjust font size for readability */
+        .content-table {
+          width: 100%;
+          font-family: Lucida Console;
+          font-size: 11px;
+          line-height: 1.2;
+          color: #000;
+          font-weight: 700;
+          border: 1px solid #000;
         }
       }
     `,
@@ -67,28 +68,22 @@ function Transaction() {
   const data = async () => {
     try {
       const response = await axios.get(TRANSACTION_URL, {
-        params: {
-          date: startDate,
-        },
-        withCredentials: true, // Ensure cookies are sent with the request
+        params: { date: startDate },
+        withCredentials: true,
       });
       if (response.status === 200) {
         setDetails(response.data);
       }
     } catch (error) {
-      console.log("error: ", error);
+      console.error("Error fetching data:", error);
       alert("Session Expired! Please login again.");
       navigate("/login");
     }
   };
 
   const handleDateChange = (e) => {
-    if (e.target.value !== null) {
-      setStartDate(e.target.value);
-      navigate(`/transaction/${e.target.value}`);
-    } else {
-      navigate(`/transaction/${startDate}`);
-    }
+    setStartDate(e.target.value || startDate);
+    navigate(`/transaction/${e.target.value || startDate}`);
   };
 
   const [transaction, setTransaction] = useState({
@@ -110,18 +105,13 @@ function Transaction() {
   const saveTransaction = async () => {
     try {
       await axios.post(SAVE_TRANSACTION, transaction, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-        withCredentials: true, // Ensure cookies are sent with the request
-      }).then((res) => {
-        if (res.status === 200) {
-          setLoading(!loading);
-          data();
-        }
+        headers: { "Content-Type": "application/json" },
+        withCredentials: true,
       });
+      setLoading(!loading);
+      data();
     } catch (error) {
-      console.log(error);
+      console.error("Error saving transaction:", error);
       alert("Session Expired! Please login again.");
       navigate("/login");
     }
@@ -144,18 +134,15 @@ function Transaction() {
     navigate(`/EditTransaction/${id}`);
   }
 
-  var total = details.reduce((accum, item) => accum + item.amount, 0);
-  var tipTotal = details.reduce((accum, item) => accum + item.tip, 0).toFixed(1);
-  var serviceTotal = details.reduce((accum, item) => accum + item.count, 0);
+  const total = details.reduce((accum, item) => accum + item.amount, 0);
+  const tipTotal = details.reduce((accum, item) => accum + item.tip, 0).toFixed(1);
+  const serviceTotal = details.reduce((accum, item) => accum + item.count, 0);
   let cashTotal = 0;
   let venmo = 0;
-  for (let i = 0; i < details.length; i++) {
-    if (details[i].by === "CH") {
-      cashTotal += details[i].amount;
-    } else if (details[i].by === "VE") {
-      venmo += details[i].amount;
-    }
-  }
+  details.forEach((detail) => {
+    if (detail.by === "CH") cashTotal += detail.amount;
+    if (detail.by === "VE") venmo += detail.amount;
+  });
 
   return (
     <>
@@ -166,7 +153,7 @@ function Transaction() {
         />
       </Helmet>
       <div className="wrapper">
-        <div className="title"> Transaction </div>
+        <div className="title">Transaction</div>
         <div className="form">
           <div className="inputfield">
             <input
@@ -174,7 +161,7 @@ function Transaction() {
               type="text"
               className="input"
               name="name"
-              onChange={(e) => handleChange(e)}
+              onChange={handleChange}
               value={transaction.name}
             />
           </div>
@@ -200,34 +187,31 @@ function Transaction() {
             <div style={{ width: "auto" }} className="inputfield small-field">
               <input
                 type="number"
-                pattern="[0-9]*"
                 placeholder="$"
                 className="input"
                 name="amount"
-                onChange={(e) => handleChange(e)}
+                onChange={handleChange}
                 value={transaction.amount}
               />
             </div>
             <div style={{ width: "auto" }} className="inputfield small-field">
               <input
                 type="number"
-                pattern="[0-9]*"
                 placeholder="Tip"
                 name="tip"
                 className="input"
+                onChange={handleChange}
                 value={transaction.tip}
-                onChange={(e) => handleChange(e)}
               />
             </div>
             <div style={{ width: "auto" }} className="inputfield small-field">
               <input
                 type="number"
-                pattern="[0-9]*"
                 placeholder="Service"
                 name="count"
                 className="input"
+                onChange={handleChange}
                 value={transaction.count}
-                onChange={(e) => handleChange(e)}
               />
             </div>
             <div className="inputfield small-field" style={{ width: "auto" }}>
@@ -250,14 +234,14 @@ function Transaction() {
               name="note"
               type="text"
               className="input"
+              onChange={handleChange}
               value={transaction.note}
-              onChange={(e) => handleChange(e)}
             />
           </div>
           <div className="inputfield">
             <input
               type="button"
-              onClick={(e) => {
+              onClick={() => {
                 saveTransaction();
                 handleClear();
               }}
@@ -268,18 +252,23 @@ function Transaction() {
           </div>
         </div>
       </div>
-      {/* ----------------------------- */}
-      {total !== 0 ? (
+      {total !== 0 && (
         <>
           <div style={{ paddingBottom: "70px" }} className="wrapper" ref={componentRef}>
             <div className="titleName">
-              {(user.firstName).toUpperCase()}
-              <button className="printBtn button-same-size" style={{ float: "right" }} onClick={handlePrint}>
-                Print
-              </button>
+              {user.firstName.toUpperCase()}
+              <div>
+                <button
+                  className="printBtn button-same-size"
+                  style={{ float: "right"}}
+                  onClick={handlePrint}
+                >
+                  <img style={{ width: "25px", height: "25px" }} src={printIcon} alt="Print" />
+                </button>
+              </div>
             </div>
             <div className="title">
-              <h5 style={{ fontWeight: "400", fontSize:"24px" }}>{transaction.date}</h5>
+              <h5 style={{ fontWeight: "400", fontSize: "24px" }}>{transaction.date}</h5>
             </div>
             <div className="content-table">
               <table className="customers">
@@ -296,11 +285,14 @@ function Transaction() {
                 <tbody>
                   {details.map((detail) => (
                     <tr key={detail.name}>
-                      <td style={{ fontWeight: "500"}} onDoubleClick={() => handleEdit(detail.id)}>
+                      <td style={{ fontWeight: "500" }} onDoubleClick={() => handleEdit(detail.id)}>
                         {detail.name.toUpperCase()}
-                      </td >
-                      {detail.by === "CH" ? <td style={{ fontWeight: "600" }}>{detail.by}</td> : <td >{detail.by}</td>}
-                      
+                      </td>
+                      {detail.by === "CH" ? (
+                        <td style={{ fontWeight: "600" }}>{detail.by}</td>
+                      ) : (
+                        <td>{detail.by}</td>
+                      )}
                       <td>{detail.amount}</td>
                       <td>{detail.tip}</td>
                       <td>{detail.count}</td>
@@ -315,19 +307,19 @@ function Transaction() {
                     <td>{total}</td>
                     <td>{tipTotal}</td>
                     <td>{serviceTotal}</td>
-                    <td></td>
+                    <td>
+                      <div>Cash: {cashTotal}</div>
+                      <div>Venmo: {venmo}</div>
+                    </td>
                   </tr>
                 </tbody>
               </table>
             </div>
             <div style={{ display: "flex", justifyContent: "center", padding: "5px" }}>
-              <div style={{ margin: "auto", fontWeight: "500" }}>Cash: {cashTotal}</div>
-              <div style={{ margin: "auto", fontWeight: "500" }}>Venmo: {venmo}</div>
+              
             </div>
           </div>
         </>
-      ) : (
-        <div></div>
       )}
     </>
   );

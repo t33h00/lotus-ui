@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import "./navibar.css";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom"; // Import useLocation
 import { BottomNavigation, BottomNavigationAction } from "@mui/material";
 import EditNoteIcon from "@mui/icons-material/EditNote";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
@@ -10,6 +10,7 @@ import { logout } from "../Service/Service";
 
 function Navibar() {
   const navigate = useNavigate();
+  const location = useLocation(); // Get the current path
   const [value, setValue] = useState(0);
   const mili = new Date().getTime() - 21600000;
   const today = new Date(mili).toJSON().slice(0, 10);
@@ -38,7 +39,10 @@ function Navibar() {
           </a>
         </span>
         <div className="nav-logo">
-          <a onClick={handleLogout}>Logout</a> 
+          {/* Conditionally render the Logout link */}
+          {location.pathname !== "/login" && (
+            <a onClick={handleLogout}>Logout</a>
+          )}
         </div>
       </div>
       <div>

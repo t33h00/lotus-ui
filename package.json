@@ -37,7 +37,8 @@
     "react-to-print": "^2.14.15",
     "stream": "^0.0.3",
     "util": "^0.12.5",
-    "web-vitals": "^2.1.4"
+    "web-vitals": "^2.1.4",
+    "webusb-receipt-printer": "^1.1.1"
   },
   "scripts": {
     "start": "react-scripts start",

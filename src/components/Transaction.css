@@ -161,3 +161,32 @@
   box-sizing: border-box; /* Include padding in width calculation */
 }
 
+.save-button {
+  margin-left: 5px;
+  padding: 2px 5px;
+  font-size: 12px;
+  background-color: #4caf50; /* Green background */
+  color: white;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.save-button:hover {
+  background-color: #45a049; /* Darker green on hover */
+}
+
+.checkmark-button {
+  padding: 4px 8px;
+  font-size: 14px;
+  background-color: #4caf50; /* Green background */
+  color: white;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.checkmark-button:hover {
+  background-color: #45a049; /* Darker green on hover */
+}
+

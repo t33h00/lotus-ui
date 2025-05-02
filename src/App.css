@@ -1,4 +1,3 @@
-
 @import url('https://fonts.googleapis.com/css?family=Montserrat:300,700&display=swap');
 
 .wrapper{
@@ -75,18 +74,32 @@ th {
   color: #ffffff;
   font-size: 10px;
   cursor: pointer;
-  background: #2c73ec;
   border-radius: 5px;
-  outline: none;
+  display: inline-flex;
+  justify-content: center; /* Center horizontally */
+  align-items: center; /* Center vertically */
+  padding: 0; /* Remove padding to avoid misalignment */
+  background: transparent; /* Optional: Transparent background */
+  border: 1px solid #3b3b3b;
+}
+
+.printBtn:disabled {
+  background-color: transparent; /* Light gray background for disabled state */
+  cursor: not-allowed; /* Show not-allowed cursor */
+  opacity: 0.6; /* Reduce opacity for a disabled effect */
 }
 
 .button-same-size {
-  width: 60px; /* Adjust the width as needed */
-  height: 25px; /* Adjust the height as needed */
+  width: 50px; /* Adjust the width as needed */
+  height: 30px; /* Adjust the height as needed */
 }
 
 .table-header {
   background-color: #75a1fa;
   font-weight: bold;
   color: #fff;
+}
+
+h5 {
+  color: black
 }

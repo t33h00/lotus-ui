@@ -7,6 +7,9 @@ import { BASE_URL } from "../Service/Service";
 import React from "react";
 import { useReactToPrint } from "react-to-print";
 import PrivateRoute from "./PrivateRoute";
+import sendIcon from "../image/send.svg";
+import sentIcon from "../image/sent.svg";
+import printIcon from "../image/printer.svg";
 
 function CalViewDetail({ date, updateReport}) {
   const TRANSACTION_URL = BASE_URL + "user/findbydate";
@@ -33,26 +36,32 @@ function CalViewDetail({ date, updateReport}) {
   const handlePrint = useReactToPrint({
       content: () => componentRef.current,
       pageStyle: `
-        @media print {
-          @page {
-            size: 72mm auto; /* Set the page size for thermal printers */
-            margin: 0; /* Remove default margins */
-          }
-          body {
-            -webkit-print-color-adjust: exact; /* Ensure colors are printed accurately */
-            margin: 0; /* Remove body margin */
-          }
-          .printBtn, .non-printable {
-            display: none !important; /* Hide non-printable elements */
-          }
-          .table-header {
-            display: none; /* Hide table headers if not needed */
-          }
-          .customers {
-            width: 100%; /* Ensure table fits the page */
-            font-size: 12px; /* Adjust font size for readability */
-          }
+       @media print {
+        @page {
+          size: 72mm auto;
+          margin: 0;
         }
+        body {
+          -webkit-print-color-adjust: exact;
+          margin: 0;
+          font-family: Lucida Console;
+          font-size: 11px;
+          line-height: 1.2;
+          color: #000;
+          font-weight: 600;
+        }
+        .printBtn, .non-printable {
+          display: none !important;
+        }
+        .customers {
+          width: 100%;
+          font-family: Lucida Console;
+          font-size: 11px;
+          line-height: 1.2;
+          color: #000;
+          font-weight: 600;
+        }
+      }
       `,
     });
 
@@ -180,10 +189,10 @@ function CalViewDetail({ date, updateReport}) {
               {user.firstName}
               <div>
                 <button className="printBtn button-same-size" style={{ marginRight: "5px" }} onClick={handlePrint}>
-                  Print
+                  <img style={{ width: "25px", height: "25px" }} src={printIcon} alt="Print" />
                 </button>
                 <button className="printBtn button-same-size" onClick={sendForm} disabled={isFormSent}>
-                  {isFormSent ? "Sent" : "Send"}
+                  {isFormSent ? <img style={{ width: "25px", height: "25px" }} src={sentIcon} alt="sent" /> : <img style={{ width: "25px", height: "25px" }} src={sendIcon} alt="send" />}
                 </button>
               </div>
             </div>
