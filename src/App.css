@@ -24,7 +24,7 @@
 
 thead{
   text-transform: uppercase;
-  color: #2c2c2c;
+  color: #050505;
   font-weight: 600;
 }
 
@@ -74,13 +74,13 @@ th {
   color: #ffffff;
   font-size: 10px;
   cursor: pointer;
-  border-radius: 5px;
+  /* border-radius: 5px; */
   display: inline-flex;
   justify-content: center; /* Center horizontally */
   align-items: center; /* Center vertically */
   padding: 0; /* Remove padding to avoid misalignment */
   background: transparent; /* Optional: Transparent background */
-  border: 1px solid #3b3b3b;
+  /* border-bottom: 1px solid #d5d5d5; */
 }
 
 .printBtn:disabled {
@@ -92,12 +92,6 @@ th {
 .button-same-size {
   width: 50px; /* Adjust the width as needed */
   height: 30px; /* Adjust the height as needed */
-}
-
-.table-header {
-  background-color: #75a1fa;
-  font-weight: bold;
-  color: #fff;
 }
 
 h5 {

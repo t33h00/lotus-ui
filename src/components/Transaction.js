@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import useLocalState from "./useLocalState";
 import axios from "axios";
 import { useReactToPrint } from "react-to-print";
@@ -9,29 +9,21 @@ import { Helmet } from "react-helmet-async";
 import { BASE_URL } from "../Service/Service";
 import { requestForToken } from "./firebase";
 import PrivateRoute from "./PrivateRoute";
-import printIcon from "../image/printer.svg"; // Correctly import the print.svg file
+import printIcon from "../image/printer.svg";
 
 function Transaction() {
   const TRANSACTION_URL = BASE_URL + "user/findbydate";
   const SAVE_TRANSACTION = BASE_URL + "user/transaction";
-  const [user, setUser] = useLocalState("", "user");
+  const [user] = useLocalState("", "user");
   const { date } = useParams();
   const navigate = useNavigate();
   const [details, setDetails] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [by, setBy] = useState("CC");
   const mili = new Date().getTime() - 21600000;
   const today = new Date(mili).toJSON().slice(0, 10);
   const [startDate, setStartDate] = useState(date ? date : today);
 
-  useEffect(() => {
-    if (user) {
-      requestForToken(user);
-    }
-    data();
-  }, [startDate, user]);
+  const componentRef = useRef();
 
-  let componentRef = useRef();
   const handlePrint = useReactToPrint({
     content: () => componentRef.current,
     pageStyle: `
@@ -44,28 +36,28 @@ function Transaction() {
           -webkit-print-color-adjust: exact;
           margin: 0;
           font-family: Lucida Console;
-          font-size: 11px;
+          font-size: 10px !important;
           line-height: 1.2;
           color: #000;
-          font-weight: 700;
+          font-weight: 600;
+          width: 100vw;
         }
         .printBtn, .non-printable {
           display: none !important;
         }
         .content-table {
-          width: 100%;
+          width: 100vw;
           font-family: Lucida Console;
-          font-size: 11px;
+          font-size: 10px !important;
           line-height: 1.2;
           color: #000;
-          font-weight: 700;
-          border: 1px solid #000;
+          font-weight: 600;
         }
       }
     `,
   });
 
-  const data = async () => {
+  const data = useCallback(async () => {
     try {
       const response = await axios.get(TRANSACTION_URL, {
         params: { date: startDate },
@@ -79,11 +71,19 @@ function Transaction() {
       alert("Session Expired! Please login again.");
       navigate("/login");
     }
-  };
+  }, [TRANSACTION_URL, startDate, navigate]);
+
+  useEffect(() => {
+    if (user) {
+      requestForToken(user);
+    }
+    data();
+  }, [startDate, user, data]);
 
   const handleDateChange = (e) => {
-    setStartDate(e.target.value || startDate);
-    navigate(`/transaction/${e.target.value || startDate}`);
+    const value = e.target.value || startDate;
+    setStartDate(value);
+    navigate(`/transaction/${value}`);
   };
 
   const [transaction, setTransaction] = useState({
@@ -92,7 +92,7 @@ function Transaction() {
     amount: "",
     tip: "",
     count: "",
-    by: by,
+    by: "CC",
     note: "",
     date: startDate,
   });
@@ -108,8 +108,8 @@ function Transaction() {
         headers: { "Content-Type": "application/json" },
         withCredentials: true,
       });
-      setLoading(!loading);
       data();
+      handleClear();
     } catch (error) {
       console.error("Error saving transaction:", error);
       alert("Session Expired! Please login again.");
@@ -171,10 +171,7 @@ function Transaction() {
                 <select
                   name="by"
                   value={transaction.by}
-                  onChange={(e) => {
-                    handleChange(e);
-                    setBy(e.target.value);
-                  }}
+                  onChange={handleChange}
                 >
                   <option value="CC">CC</option>
                   <option value="CH">CH</option>
@@ -241,10 +238,7 @@ function Transaction() {
           <div className="inputfield">
             <input
               type="button"
-              onClick={() => {
-                saveTransaction();
-                handleClear();
-              }}
+              onClick={saveTransaction}
               value="Save"
               className="btn"
               disabled={!transaction.name || !transaction.amount || !transaction.count}
@@ -256,11 +250,11 @@ function Transaction() {
         <>
           <div style={{ paddingBottom: "70px" }} className="wrapper" ref={componentRef}>
             <div className="titleName">
-              {user.firstName.toUpperCase()}
+              {user.firstName}
               <div>
                 <button
                   className="printBtn button-same-size"
-                  style={{ float: "right"}}
+                  style={{ float: "right" }}
                   onClick={handlePrint}
                 >
                   <img style={{ width: "25px", height: "25px" }} src={printIcon} alt="Print" />
@@ -284,7 +278,7 @@ function Transaction() {
                 </thead>
                 <tbody>
                   {details.map((detail) => (
-                    <tr key={detail.name}>
+                    <tr key={detail.id}>
                       <td style={{ fontWeight: "500" }} onDoubleClick={() => handleEdit(detail.id)}>
                         {detail.name.toUpperCase()}
                       </td>
@@ -320,7 +314,7 @@ function Transaction() {
             </div>
           </div>
         </>
-      )}
+        )}
     </>
   );
 }

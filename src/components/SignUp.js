@@ -14,7 +14,7 @@ function SignUp() {
     watch,
     formState: { errors },
   } = useForm();
-  const SIGNUP_URL = BASE_URL + "user/save";
+  const SIGNUP_URL = BASE_URL + "api/save";
   const [loading, setLoading] = useState(false);
   const [completed, setCompleted] = useState(false);
   const navigate = useNavigate();

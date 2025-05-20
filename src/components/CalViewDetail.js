@@ -1,42 +1,41 @@
-import { useState, useEffect, useContext, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import useLocalState from "./useLocalState";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { BASE_URL } from "../Service/Service";
-import React from "react";
 import { useReactToPrint } from "react-to-print";
 import PrivateRoute from "./PrivateRoute";
 import sendIcon from "../image/send.svg";
-import sentIcon from "../image/sent.svg";
+import sentIcon from "../image/sent.png";
 import printIcon from "../image/printer.svg";
 
-function CalViewDetail({ date, updateReport}) {
+function CalViewDetail({ date, updateReport }) {
   const TRANSACTION_URL = BASE_URL + "user/findbydate";
   const SAVE_REPORT = BASE_URL + "user/report";
   const [details, setDetails] = useState([]);
   const navigate = useNavigate();
-  const [user,setUser] = useLocalState("", "user");
+  const [user] = useLocalState("", "user");
   const [isFormSent, setIsFormSent] = useState(false);
-  let convertDate =date?.toISOString().slice(0, 10);
   const [loading, setLoading] = useState(false);
-  const [report, setReport] = useState({
+  const convertDate = date?.toISOString().slice(0, 10);
+
+  const report = {
     date: convertDate,
     sent: true,
-  });
-
-  let config = {
-    params: {
-      date: convertDate,
-    },
-    withCredentials: true
   };
 
-  let componentRef = useRef();
+  const config = {
+    params: { date: convertDate },
+    withCredentials: true,
+  };
+
+  const componentRef = useRef();
+
   const handlePrint = useReactToPrint({
-      content: () => componentRef.current,
-      pageStyle: `
-       @media print {
+    content: () => componentRef.current,
+    pageStyle: `
+      @media print {
         @page {
           size: 72mm auto;
           margin: 0;
@@ -44,137 +43,106 @@ function CalViewDetail({ date, updateReport}) {
         body {
           -webkit-print-color-adjust: exact;
           margin: 0;
+          width: auto;
           font-family: Lucida Console;
-          font-size: 11px;
+          font-size: 10px;
           line-height: 1.2;
           color: #000;
-          font-weight: 600;
+          font-weight: 700;
         }
         .printBtn, .non-printable {
           display: none !important;
         }
-        .customers {
-          width: 100%;
+        .content-table {
+          width: auto;
           font-family: Lucida Console;
-          font-size: 11px;
+          font-size: 10px;
           line-height: 1.2;
           color: #000;
-          font-weight: 600;
+          font-weight: 700;
         }
       }
-      `,
-    });
+    `,
+  });
 
-  const getReport = async () => {
+  const getReport = useCallback(async () => {
     try {
-      await axios
-        .get(SAVE_REPORT, config)
-        .then((res) => {
-          res.data === ""? setIsFormSent (false) : setIsFormSent(true);
-        });
+      const res = await axios.get(SAVE_REPORT, config);
+      setIsFormSent(res.data !== "");
     } catch (error) {
       alert("Session Expired! Please login again.");
       navigate("/login");
     }
-  }
-  useEffect(() => {
-    if (date !== null) {
-        let data = async () => {
-          try{
-            await axios
-            .get(TRANSACTION_URL, config)
-            .then((res) => setDetails(res.data));
-          } catch(error){
-            alert("Session Expired! Please login again.")
-            navigate("/login")
-          }
-        };
-        data();
-        getReport();
-    }
-  }, [date]);
+  }, [SAVE_REPORT, config, navigate]);
 
-  function handleEdit(id) {
-      navigate(`/EditTransaction/${id}`);
-  }
-  var total = details.reduce((accum, item) => accum + item.amount, 0);
-  var tipTotal = details.reduce((accum, item) => accum + item.tip, 0).toFixed(1);
-  var serviceTotal = details.reduce((accum, item) => accum + item.count, 0);
+  const fetchDetails = useCallback(async () => {
+    try {
+      const res = await axios.get(TRANSACTION_URL, config);
+      setDetails(res.data);
+    } catch (error) {
+      alert("Session Expired! Please login again.");
+      navigate("/login");
+    }
+  }, [TRANSACTION_URL, config, navigate]);
+
+  useEffect(() => {
+    if (date) {
+      fetchDetails();
+      getReport();
+    }
+  }, [date, fetchDetails, getReport]);
+
+  const handleEdit = (id) => {
+    navigate(`/EditTransaction/${id}`);
+  };
+
+  const total = details.reduce((accum, item) => accum + item.amount, 0);
+  const tipTotal = details.reduce((accum, item) => accum + item.tip, 0).toFixed(1);
+  const serviceTotal = details.reduce((accum, item) => accum + item.count, 0);
   let cashTotal = 0;
   let venmo = 0;
-  for (let i = 0; i < details.length; i++) {
-    if (details[i].by === "CH") {
-      cashTotal += details[i].amount;
-    } else if (details[i].by === "VE") {
-      venmo += details[i].amount;
-    }
-  }
+  details.forEach((detail) => {
+    if (detail.by === "CH") cashTotal += detail.amount;
+    else if (detail.by === "VE") venmo += detail.amount;
+  });
 
-  const saveReport = async () => {
+  const saveReport = useCallback(async () => {
     try {
-      const updatedReport = {
-        ...report,
-        date: convertDate,
-      };
-      updateReport(updatedReport);
-      setReport(updatedReport);
-      await axios
-        .post(SAVE_REPORT, updatedReport, {withCredentials: true})
-        .then((res) => {
-          setIsFormSent(true);
-        });
+      updateReport(report);
+      await axios.post(SAVE_REPORT, report, { withCredentials: true });
+      setIsFormSent(true);
     } catch (error) {
       alert("Session Expired! Please login again.");
       navigate("/login");
     }
-  };
+  }, [SAVE_REPORT, report, updateReport, navigate]);
 
   const sendForm = async () => {
     setLoading(true);
-    var proxy_url = 'https://quiet-fjord-27536-22f22dca904a.herokuapp.com/';
-    const url = "https://docs.google.com/forms/u/0/d/e/1FAIpQLSfSPwGr9un-2Zqh-t2jRybul-zY8CgRPBm1paOGmKwa3daI5w/formResponse?";
-    const urlLy = "https://docs.google.com/forms/u/0/d/e/1FAIpQLSdWSn2gPNivqxcd4ZrdLoxr3KABGc8_O9aQmfupRV-HjTmd4Q/formResponse?";
-
-    const formData = new FormData();
-    formData.append("entry.658123266", user.firstName);
-    formData.append("entry.127700318", total);
-    formData.append("entry.1168683895", tipTotal);
-    formData.append("entry.1938661854", 0);
-    formData.append("entry.2008968433", serviceTotal);
-    formData.append("entry.1444595491_month", convertDate.slice(5,7));
-    formData.append("entry.1444595491_day", convertDate.slice(8,10));
-
-    const formDataLy = new FormData();
-    formDataLy.append("entry.1949367796", user.firstName);
-    formDataLy.append("entry.987390504", total);
-    formDataLy.append("entry.375054098", tipTotal);
-    formDataLy.append("entry.440271778", serviceTotal);
-    formDataLy.append("entry.667356686_month", convertDate.slice(5,7));
-    formDataLy.append("entry.667356686_day", convertDate.slice(8,10));
-    formDataLy.append("entry.667356686_year", convertDate.slice(0,4));
-
-    try{
-      await fetch(proxy_url + url, {
-        method: 'POST',
-        body: formData,
-        // mode: 'no-cors'
-      }).then(res => {
-        if(res.ok){
-          saveReport();
-          setIsFormSent(true);
-          setLoading(false);
-          alert("Form sent successfully!");
-        } else {
-          alert("Error from else");
-          setLoading(false);
-        }
+    const formData = {
+      "entry.658123266": user.firstName,
+      "entry.127700318": total,
+      "entry.1168683895": tipTotal,
+      "entry.1938661854": 0,
+      "entry.2008968433": serviceTotal,
+      "entry.1444595491_month": convertDate.slice(5, 7),
+      "entry.1444595491_day": convertDate.slice(8, 10),
+    };
+    try {
+      await fetch(BASE_URL + "api/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
       });
-    } catch(error){
-      alert("Error from Catch");
+      await saveReport();
+      setLoading(false);
+      alert("Form sent successfully!");
+    } catch (error) {
+      alert("Error sending form.");
       setLoading(false);
     }
   };
-  
+
   return (
     <>
       <Helmet>
@@ -183,67 +151,70 @@ function CalViewDetail({ date, updateReport}) {
           content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
         />
       </Helmet>
-        <>
-          {!loading? (<div style={{ paddingBottom: "70px" }} className="wrapper" ref={componentRef}>
-            <div className="titleName">
-              {user.firstName}
-              <div>
-                <button className="printBtn button-same-size" style={{ marginRight: "5px" }} onClick={handlePrint}>
-                  <img style={{ width: "25px", height: "25px" }} src={printIcon} alt="Print" />
-                </button>
-                <button className="printBtn button-same-size" onClick={sendForm} disabled={isFormSent}>
-                  {isFormSent ? <img style={{ width: "25px", height: "25px" }} src={sentIcon} alt="sent" /> : <img style={{ width: "25px", height: "25px" }} src={sendIcon} alt="send" />}
-                </button>
-              </div>
+      {!loading ? (
+        <div style={{ paddingBottom: "70px" }} className="wrapper" ref={componentRef}>
+          <div className="titleName">
+            {user.firstName}
+            <div>
+              <button className="printBtn button-same-size" style={{ marginRight: "5px" }} onClick={handlePrint}>
+                <img style={{ width: "25px", height: "25px" }} src={printIcon} alt="Print" />
+              </button>
+              <button className="printBtn button-same-size" onClick={sendForm} disabled={isFormSent}>
+                {isFormSent ? (
+                  <img style={{ width: "25px", height: "25px" }} src={sentIcon} alt="sent" />
+                ) : (
+                  <img style={{ width: "25px", height: "25px" }} src={sendIcon} alt="send" />
+                )}
+              </button>
             </div>
-            <div className="title">
-              <h5 style={{ fontWeight: "400", fontSize:"24px" }}>{convertDate}</h5>
-            </div>
-            <div className="content-table">
-              <table className="customers">
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>By</th>
-                    <th>$$</th>
-                    <th>Tip</th>
-                    <th>Ser</th>
-                    <th>Note</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {details.map((detail) => (
-                    <tr key={detail.id}>
-                      <td style={{ fontWeight: "400" }} onDoubleClick={() => handleEdit(detail.id)}>
-                        {detail.name.toUpperCase()}
-                      </td>
-                      {detail.by === "CH" ? <td style={{ fontWeight: "600" }}>{detail.by}</td> : <td>{detail.by}</td>}
-                      <td>{detail.amount}</td>
-                      <td>{detail.tip}</td>
-                      <td>{detail.count}</td>
-                      <td>{detail.note}</td>
-                    </tr>
-                  ))}
-                </tbody>
-                <tbody>
-                  <tr>
-                    <td style={{ fontWeight: "bold" }}>Total:</td>
-                    <td></td>
-                    <td>{total}</td>
-                    <td>{tipTotal}</td>
-                    <td>{serviceTotal}</td>
-                    <td>
+          </div>
+          <div className="title">
+            <h5 style={{ fontWeight: "400", fontSize: "24px" }}>{convertDate}</h5>
+          </div>
+          <div className="content-table">
+            <table className="customers">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>By</th>
+                  <th>$$</th>
+                  <th>Tip</th>
+                  <th>Ser</th>
+                  <th>Note</th>
+                </tr>
+              </thead>
+              <tbody>
+                {details.map((detail) => (
+                  <tr key={detail.id}>
+                    <td style={{ fontWeight: "400" }} onDoubleClick={() => handleEdit(detail.id)}>
+                      {detail.name.toUpperCase()}
                     </td>
+                    <td style={detail.by === "CH" ? { fontWeight: "600" } : {}}>{detail.by}</td>
+                    <td>{detail.amount}</td>
+                    <td>{detail.tip}</td>
+                    <td>{detail.count}</td>
+                    <td>{detail.note}</td>
                   </tr>
-                  </tbody>
-              </table>
-            </div>
-            <div style={{ display: "flex", justifyContent: "center", padding: "5px" }}>
-              <div style={{ margin: "auto", fontWeight: "bold" }}>Cash: {cashTotal}</div>
-              <div style={{ margin: "auto", fontWeight: "bold" }}>Venmo: {venmo}</div>
-            </div>
-          </div>) : (<div className="loading"></div>)}
-        </>
+                ))}
+                <tr>
+                  <td style={{ fontWeight: "bold" }}>Total:</td>
+                  <td></td>
+                  <td>{total}</td>
+                  <td>{tipTotal}</td>
+                  <td>{serviceTotal}</td>
+                  <td></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div style={{ display: "flex", justifyContent: "center", padding: "5px" }}>
+            <div style={{ margin: "auto", fontWeight: "bold" }}>Cash: {cashTotal}</div>
+            <div style={{ margin: "auto", fontWeight: "bold" }}>Venmo: {venmo}</div>
+          </div>
+        </div>
+      ) : (
+        <div className="loading"></div>
+      )}
     </>
   );
 }

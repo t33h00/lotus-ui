@@ -127,7 +127,7 @@
 
 .customers {
   border-collapse: collapse;
-  width: 100%;
+  width: auto;
 }
 
 .customers td,
@@ -135,58 +135,11 @@
   border-bottom: 1px solid rgb(200, 197, 197);
   padding: 12px;
 }
-
-.editable-input {
-  width: 100%; /* Ensure the input takes the full width of the cell */
-  border: none; /* Remove default border */
-  outline: none; /* Remove focus outline */
-  background: transparent; /* Ensure background matches the table */
-  font-size: 14px; /* Match the font size with the table */
-  padding: 4px; /* Add padding for better spacing */
-  box-sizing: border-box; /* Include padding in width calculation */
-}
-
-.editable-input:focus {
-  border-bottom: 1px solid #000; /* Highlight underline on focus */
-}
-
-/* Optional: Style for editable-select if needed */
-.editable-select {
-  width: 100%; /* Ensure the select fits the cell */
-  border: none; /* Remove default border */
-  outline: none; /* Remove focus outline */
-  background: transparent; /* Match the table background */
-  font-size: 14px; /* Match font size */
-  padding: 4px; /* Add padding */
-  box-sizing: border-box; /* Include padding in width calculation */
-}
-
-.save-button {
-  margin-left: 5px;
-  padding: 2px 5px;
-  font-size: 12px;
-  background-color: #4caf50; /* Green background */
-  color: white;
-  border: none;
-  border-radius: 3px;
-  cursor: pointer;
-}
-
-.save-button:hover {
-  background-color: #45a049; /* Darker green on hover */
-}
-
-.checkmark-button {
-  padding: 4px 8px;
-  font-size: 14px;
-  background-color: #4caf50; /* Green background */
-  color: white;
-  border: none;
-  border-radius: 3px;
-  cursor: pointer;
-}
-
-.checkmark-button:hover {
-  background-color: #45a049; /* Darker green on hover */
+.content-table {
+  display: flex;
+  flex-direction: column;
+  border-radius: 5px;
+  overflow: hidden;
+  width: auto;
 }
 

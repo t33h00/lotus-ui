@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { BASE_URL, logout } from "../../Service/Service";
 import useLocalState from "../useLocalState";
-import { set } from "date-fns";
 
 const PrivateRoute = (Component, authenticated) => {
   const WrappedComponent = (props) => {
@@ -21,7 +20,6 @@ const PrivateRoute = (Component, authenticated) => {
         if(response.data.valid === true) {
           setIsValid(true);
           setUser(response.data.user);
-          console.log("User data:", response.data.user);
         } else if (response.data.status === 401) {
           alert("Session Expired! Please login again.");
           setUser("");

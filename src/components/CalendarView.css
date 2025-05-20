@@ -1,26 +1,3 @@
-/* 
-.rbc-toolbar {
-    border: 1px solid #bcbcbc;
-    border-radius: 8px;
-    padding: 10px;
-    margin-bottom: 20px;
-    text-transform: uppercase;
-}
-.rbc-toolbar button {
-    color: #000000;
-    border: none;
-    padding: 10px 15px;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: 0.3s ease;
-}
-.rbc-header{
-   font-weight: 400;
-}
-.rbc-toolbar-label {
-    font-size: 20px;
-    font-weight: 500;
-    color: #070000;} */
 
  .rbc-event, .rbc-event-allday, .rbc-background-event {
     margin: auto;
