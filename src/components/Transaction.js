@@ -25,42 +25,74 @@ function Transaction() {
   const componentRef = useRef();
 
   const handlePrint = useReactToPrint({
-    content: () => componentRef.current,
-    pageStyle: `
-      @media print {
-        @page {
-          size: 72mm auto;
-          margin: 0;
-        }
-        body {
-          -webkit-print-color-adjust: exact;
-          margin: 0;
-          font-family: Lucida Console;
-          font-size: 10px !important;
-          line-height: 1.2;
-          color: #000;
-          font-weight: 600;
-          width: 100vw;
-        }
-        .printBtn, .non-printable {
-          display: none !important;
-        }
-        .content-table {
-          width: 100vw;
-          font-family: Lucida Console;
-          font-size: 10px !important;
-          line-height: 1.2;
-          color: #000;
-          font-weight: 600;
-        }
-      }
-    `,
-  });
+        content: () => componentRef.current,
+        documentTitle: 'receipt',
+        pageStyle: `
+          @page {
+            size: 72mm auto;
+            margin: 0;
+          }
+          @media print {
+            html, body {
+              width: 72mm !important;
+              min-width: 72mm !important;
+              max-width: 72mm !important;
+              margin: 0 !important;
+              padding: 0 !important;
+              padding-left: 0 !important;
+              box-sizing: border-box;
+              background: #fff !important;
+            }
+            body, .wrapper, .content-table, .customers, table, th, td {
+              font-family: "Lucida Console", "Courier New", Courier, monospace !important;
+              font-size: 11px !important;
+              line-height: 1.2 !important;
+              color: #000 !important;
+              font-weight: 550 !important;
+              background: #fff !important;
+            }
+            .printBtn, .non-printable {
+              display: none !important;
+            }
+            .wrapper, .content-table, .customers {
+              width: 72mm !important;
+              min-width: 72mm !important;
+              max-width: 72mm !important;
+              box-sizing: border-box;
+              box-shadow: none !important;
+              margin: 0 !important;
+              padding: 0 !important;
+              padding-left: 0 !important;
+            }
+            table {
+              table-layout: fixed !important;
+              width: 100% !important;
+              margin: 0 !important;
+              padding: 0 !important;
+              border-spacing: 0 !important;
+              border-collapse: collapse !important;
+            }
+            thead,th, td {
+              width: auto !important;
+              margin: 0 !important;
+              padding: 0 !important;
+              text-align: left !important;
+            }
+            .customers tr {
+              height: 30px !important; /* add vertical spacing between rows */
+            }
+            .small{
+              width: 10% !important;}
+            .note{
+              width: 35% !important;}  
+          }
+        `,
+      });
 
   const data = useCallback(async () => {
     try {
       const response = await axios.get(TRANSACTION_URL, {
-        params: { date: startDate },
+        params: { created_at: startDate },
         withCredentials: true,
       });
       if (response.status === 200) {
@@ -92,9 +124,9 @@ function Transaction() {
     amount: "",
     tip: "",
     count: "",
-    by: "CC",
+    pay_by: "CC",
     note: "",
-    date: startDate,
+    created_at: startDate,
   });
 
   const handleChange = (e) => {
@@ -126,7 +158,7 @@ function Transaction() {
       count: "",
       by: "CC",
       note: "",
-      date: startDate,
+      created_at: startDate,
     });
   };
 
@@ -140,8 +172,8 @@ function Transaction() {
   let cashTotal = 0;
   let venmo = 0;
   details.forEach((detail) => {
-    if (detail.by === "CH") cashTotal += detail.amount;
-    if (detail.by === "VE") venmo += detail.amount;
+    if (detail.pay_by === "CH") cashTotal += detail.amount;
+    if (detail.pay_by === "VE") venmo += detail.amount;
   });
 
   return (
@@ -169,7 +201,7 @@ function Transaction() {
             <div className="inputfield small-field">
               <div style={{ width: "55px" }} className="custom_select">
                 <select
-                  name="by"
+                  name="pay_by"
                   value={transaction.by}
                   onChange={handleChange}
                 >
@@ -215,7 +247,7 @@ function Transaction() {
               <input
                 type="date"
                 className="input"
-                name="date"
+                name="created_at"
                 onChange={(e) => {
                   handleChange(e);
                   handleDateChange(e);
@@ -248,7 +280,10 @@ function Transaction() {
       </div>
       {total !== 0 && (
         <>
-          <div style={{ paddingBottom: "70px" }} className="wrapper" ref={componentRef}>
+          <div style={{ paddingBottom: "70px" }}
+            className="wrapper"
+            ref={componentRef}
+          >
             <div className="titleName">
               {user.firstName}
               <div>
@@ -262,18 +297,18 @@ function Transaction() {
               </div>
             </div>
             <div className="title">
-              <h5 style={{ fontWeight: "400", fontSize: "24px" }}>{transaction.date}</h5>
+              <h5 style={{ fontWeight: "400", fontSize: "24px", color: "black" }}>{transaction.created_at}</h5>
             </div>
             <div className="content-table">
               <table className="customers">
                 <thead>
                   <tr>
-                    <th>Name</th>
-                    <th>By</th>
-                    <th>$$</th>
-                    <th>Tip</th>
-                    <th>Ser</th>
-                    <th>Note</th>
+                    <th className="space">Name</th>
+                    <th className="small">By</th>
+                    <th className="small">$$</th>
+                    <th className="small">Tip</th>
+                    <th className="small">Ser</th>
+                    <th className="note">Note</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -283,9 +318,9 @@ function Transaction() {
                         {detail.name.toUpperCase()}
                       </td>
                       {detail.by === "CH" ? (
-                        <td style={{ fontWeight: "600" }}>{detail.by}</td>
+                        <td style={{ fontWeight: "600" }}>{detail.pay_by}</td>
                       ) : (
-                        <td>{detail.by}</td>
+                        <td>{detail.pay_by}</td>
                       )}
                       <td>{detail.amount}</td>
                       <td>{detail.tip}</td>
@@ -302,19 +337,18 @@ function Transaction() {
                     <td>{tipTotal}</td>
                     <td>{serviceTotal}</td>
                     <td>
-                      <div>Cash: {cashTotal}</div>
-                      <div>Venmo: {venmo}</div>
                     </td>
                   </tr>
                 </tbody>
               </table>
             </div>
             <div style={{ display: "flex", justifyContent: "center", padding: "5px" }}>
-              
+              <div style={{ margin: "auto", fontWeight: "bold" }}>Cash: {cashTotal}</div>
+              <div style={{ margin: "auto", fontWeight: "bold" }}>Venmo: {venmo}</div>
             </div>
           </div>
         </>
-        )}
+      )}
     </>
   );
 }

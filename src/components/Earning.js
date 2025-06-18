@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import axios from "axios";
 import useLocalState from "./useLocalState";
 import "./Earning.css";
@@ -9,7 +9,7 @@ import PrivateRoute from "./PrivateRoute";
 
 function Earning() {
   const CUSTOM_DATE_URL = BASE_URL + "user/customdate";
-  const [user, setUser] = useLocalState("", "user");
+  const [user] = useLocalState("", "user"); // removed setUser
   const [date1, setDate1] = useState(new Date().toLocaleDateString('en-CA'));
   const [date2, setDate2] = useState(new Date().toLocaleDateString('en-CA'));
   const [details, setDetails] = useState([]);
@@ -28,38 +28,43 @@ function Earning() {
     }
     `
   });
-  let config = {
-    params: {
-      date1: date1,
-      date2: date2,
-    },
-    withCredentials: true
+
+  const fetchData = async () => {
+    try {
+      const res = await axios.get(CUSTOM_DATE_URL, {
+        params: {
+          created_at1: date1,
+          created_at2: date2,
+        },
+        withCredentials: true
+      });
+      setDetails(res.data);
+    } catch (e) {
+      // Optionally handle error
+    }
   };
 
-  const data = async () => {
-    await axios
-      .get(CUSTOM_DATE_URL, config)
-      .then((res) => {setDetails(res.data)});}
-
   useEffect(() => {
-      data();
-    } 
-  , [date1, date2]); // Ensure no conflicting variable names
+    fetchData();
+  }, [date1, date2]);
 
-  var total = details.reduce((accum, item) => accum + item.amount, 0);
-  var counts = details.reduce((accum, item) => accum + item.count, 0);
-  var sum = total - counts;
-  var tips = Math.round(details.reduce((accum, item) => accum + item.tip, 0));
-  var deduct = Math.round((sum * (100 - rate)) / 100);
-  var estimate = Math.round(sum - deduct + tips);
-  var payCH = details.reduce((accum, item) => {
-    if(item.by === 'CH'){
+  // Memoized calculations for efficiency
+  const total = useMemo(() => details.reduce((accum, item) => accum + item.amount, 0), [details]);
+  const counts = useMemo(() => details.reduce((accum, item) => accum + item.count, 0), [details]);
+  const sum = useMemo(() => total - counts, [total, counts]);
+  const tips = useMemo(() => Math.round(details.reduce((accum, item) => accum + item.tip, 0)), [details]);
+  const deduct = useMemo(() => Math.round((sum * (100 - rate)) / 100), [sum, rate]);
+  const estimate = useMemo(() => Math.round(sum - deduct + tips), [sum, deduct, tips]);
+  const payCH = useMemo(() => details.reduce((accum, item) => {
+    if(item.pay_by === 'CH'){
       return accum + item.amount;
     } else {
       return accum;
     }
-  }, 0);
+  }, 0), [details]);
   const fullName = user?.firstName + " " + user?.lastName;
+  const check = useMemo(() => Math.round(((estimate * 60) / 100)), [estimate]);
+  const cash = useMemo(() => Math.round(estimate - check), [estimate, check]);
 
   return (
     <>
@@ -100,7 +105,7 @@ function Earning() {
             <select
               value={rate}
               className="input"
-              onChange={(e) => setRate(e.target.value)}
+              onChange={e => setRate(Number(e.target.value))}
             >
               <option value={50}>50</option>
               <option value={60}>60</option>
@@ -140,17 +145,17 @@ function Earning() {
                 </thead>
                 <tbody>
                   {Object.entries(details.reduce((acc, detail) => {
-                    if (!acc[detail.date]) {
-                      acc[detail.date] = { ...detail };
+                    if (!acc[detail.created_at]) {
+                      acc[detail.created_at] = { ...detail };
                     } else {
-                      acc[detail.date].amount += detail.amount;
-                      acc[detail.date].tip += detail.tip;
-                      acc[detail.date].count += detail.count;
+                      acc[detail.created_at].amount += detail.amount;
+                      acc[detail.created_at].tip += detail.tip;
+                      acc[detail.created_at].count += detail.count;
                     }
                     return acc;
-                  }, {})).map(([date, detail]) => (
-                    <tr key={date}>
-                      <td>{date}</td>
+                  }, {})).map(([created_at, detail]) => (
+                    <tr key={created_at}>
+                      <td>{created_at}</td>
                       <td>{Math.round(detail.tip)}</td>
                       <td>{detail.count}</td>
                       <td>{detail.amount}</td>
@@ -160,41 +165,45 @@ function Earning() {
 
                 <tfoot>
                   <tr>
-                    <td>Total</td>
-                    <td>{tips}</td>
-                    <td></td>
-                    <td>{total}</td>
-                  </tr>
-
-                  <tr>
-                    <td>Service Count</td>
-                    <td></td>
-                    <td></td>
-                    <td>-{counts}</td>
-                  </tr>
-
-                  <tr>
-                    <td>Deduct</td>
-                    <td></td>
-                    <td></td>
-                    <td>-{deduct}</td>
-                  </tr>
-
-                  <tr>
-                    <td>Tip</td>
-                    <td></td>
-                    <td></td>
-                    <td>+{tips}</td>
-                  </tr>
-
-                  <tr>
                     <td>Earning</td>
                     <td></td>
                     <td></td>
                     <td>{estimate}</td>
                   </tr>
                   <tr>
-                    <td>Cash this Period</td>
+                    <td>Check</td>
+                    <td>{check} +</td>
+                    <td>{tips}</td>
+                    <td>{check + tips}</td>
+                  </tr>
+                  <tr>
+                    <td>Cash</td>
+                    <td></td>
+                    <td></td>
+                    <td>{cash}</td>
+                  </tr>
+                  </tfoot>
+                  <tfoot>
+                  <tr>
+                    <td>Total</td>
+                    <td>{tips}</td>
+                    <td></td>
+                    <td>{total}</td>
+                  </tr>
+                  <tr>
+                    <td>Service Count</td>
+                    <td></td>
+                    <td></td>
+                    <td>-{counts}</td>
+                  </tr>
+                  <tr>
+                    <td>Deduct</td>
+                    <td></td>
+                    <td></td>
+                    <td>-{deduct}</td>
+                  </tr>
+                  <tr>
+                    <td>Cash this period</td>
                     <td></td>
                     <td></td>
                     <td>({payCH})</td>

@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { BASE_URL } from "../Service/Service";
 import PrivateRoute from "./PrivateRoute";
+import { tr } from "date-fns/locale";
 
 const payType = [
   {value: "CH", label:"CH"},
@@ -35,6 +36,7 @@ function EditTransaction() {
         await axios.get(TRANSACTION_URL, config)
                   .then((res)=>{
                     setTransaction(res.data);
+                    console.log("Transaction: ",transaction);
                   });
                   } catch(error){
                     alert("Session Expired! Please login again.")
@@ -96,7 +98,7 @@ function EditTransaction() {
           <div className="small-box" style={{display:"flex"}}>
             <div className="inputfield small-field">
               <div style={{ width: "75px" }} className="custom_select">
-                <select name="by" value={transaction.by}
+                <select name="pay_by" value={transaction.pay_by}
                   onChange={(e) => { handleChange(e);}}
                 >
                   <option value="CC">CC</option>
@@ -142,11 +144,11 @@ function EditTransaction() {
                 type="date"
                 style={{ width: "auto" }}
                 className="input"
-                name="date"
+                name="created_at"
                 onChange={(e) => {
                   handleChange(e);
                 }}
-                value={transaction.date}
+                value={transaction.created_at}
               />
             </div>
           </div>

@@ -7,7 +7,7 @@ import Email from './components/Email';
 import Transaction from './components/Transaction';
 import EditTransaction from './components/EditTransaction';
 import Login from './components/Login';
-import PrivateRoute from './components/PrivateRoute';
+import PwaInstallPrompt from './components/PwaInstallPrompt';
 import CalendarView from './components/CalendarView';
 import CalViewDetail from './components/CalViewDetail';
 import Earning from './components/Earning';
@@ -22,6 +22,7 @@ function App() {
   return (
       <BrowserRouter>
         <Navibar />
+        <PwaInstallPrompt />
         <HelmetProvider>
           <Routes>
             <Route path="*" element={<Transaction />}></Route>

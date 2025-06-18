@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import useLocalState from "./useLocalState";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -10,7 +10,7 @@ import sendIcon from "../image/send.svg";
 import sentIcon from "../image/sent.png";
 import printIcon from "../image/printer.svg";
 
-function CalViewDetail({ date, updateReport }) {
+function CalViewDetail({ created_at, updateReport }) {
   const TRANSACTION_URL = BASE_URL + "user/findbydate";
   const SAVE_REPORT = BASE_URL + "user/report";
   const [details, setDetails] = useState([]);
@@ -18,52 +18,86 @@ function CalViewDetail({ date, updateReport }) {
   const [user] = useLocalState("", "user");
   const [isFormSent, setIsFormSent] = useState(false);
   const [loading, setLoading] = useState(false);
-  const convertDate = date?.toISOString().slice(0, 10);
+  const convertDate = created_at?.toISOString().slice(0, 10);
 
-  const report = {
-    date: convertDate,
-    sent: true,
-  };
-
-  const config = {
-    params: { date: convertDate },
+  // Memoize config and report so their references don't change on every render
+  const config = useMemo(() => ({
+    params: { created_at: convertDate },
     withCredentials: true,
-  };
+  }), [convertDate]);
+
+  const report = useMemo(() => ({
+    created_at: convertDate,
+    sent: true,
+  }), [convertDate]);
 
   const componentRef = useRef();
 
   const handlePrint = useReactToPrint({
-    content: () => componentRef.current,
-    pageStyle: `
-      @media print {
-        @page {
-          size: 72mm auto;
-          margin: 0;
-        }
-        body {
-          -webkit-print-color-adjust: exact;
-          margin: 0;
-          width: auto;
-          font-family: Lucida Console;
-          font-size: 10px;
-          line-height: 1.2;
-          color: #000;
-          font-weight: 700;
-        }
-        .printBtn, .non-printable {
-          display: none !important;
-        }
-        .content-table {
-          width: auto;
-          font-family: Lucida Console;
-          font-size: 10px;
-          line-height: 1.2;
-          color: #000;
-          font-weight: 700;
-        }
-      }
-    `,
-  });
+          content: () => componentRef.current,
+          documentTitle: 'receipt',
+          pageStyle: `
+            @page {
+              size: 72mm auto;
+              margin: 0;
+            }
+            @media print {
+              html, body {
+                width: 72mm !important;
+                min-width: 72mm !important;
+                max-width: 72mm !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                box-sizing: border-box;
+                background: #fff !important;
+              }
+              body, .wrapper, .content-table, .customers, table, th, td {
+                font-family: "Lucida Console", "Courier New", Courier, monospace !important;
+                font-size: 11px !important;
+                line-height: 1.2 !important;
+                color: #000 !important;
+                font-weight: 550 !important;
+                background: #fff !important;
+              }
+              .printBtn, .non-printable {
+                display: none !important;
+              }
+              .wrapper, .content-table, .customers {
+                width: 72mm !important;
+                min-width: 72mm !important;
+                max-width: 72mm !important;
+                box-sizing: border-box;
+                box-shadow: none !important;
+                margin: 0 !important;
+                padding-right: 6px !important; /* add a little right padding */
+                padding-left: 0 !important;
+                padding-top: 0 !important;
+                padding-bottom: 0 !important;
+              }
+              table {
+                table-layout: fixed !important;
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                border-spacing: 0 !important;
+                border-collapse: collapse !important;
+              }
+              thead,th, td {
+                width: auto !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                text-align: left !important;
+              }
+              .customers tr {
+                height: 30px !important; /* add vertical spacing between rows */
+              }
+              .small{
+                width: 10% !important;}
+              .note{
+                width: 35% !important;}  
+            }
+          `,
+        });
 
   const getReport = useCallback(async () => {
     try {
@@ -86,11 +120,11 @@ function CalViewDetail({ date, updateReport }) {
   }, [TRANSACTION_URL, config, navigate]);
 
   useEffect(() => {
-    if (date) {
+    if (created_at) {
       fetchDetails();
       getReport();
     }
-  }, [date, fetchDetails, getReport]);
+  }, [created_at, fetchDetails, getReport]);
 
   const handleEdit = (id) => {
     navigate(`/EditTransaction/${id}`);
@@ -102,8 +136,8 @@ function CalViewDetail({ date, updateReport }) {
   let cashTotal = 0;
   let venmo = 0;
   details.forEach((detail) => {
-    if (detail.by === "CH") cashTotal += detail.amount;
-    else if (detail.by === "VE") venmo += detail.amount;
+    if (detail.pay_by === "CH") cashTotal += detail.amount;
+    else if (detail.pay_by === "VE") venmo += detail.amount;
   });
 
   const saveReport = useCallback(async () => {
@@ -169,18 +203,18 @@ function CalViewDetail({ date, updateReport }) {
             </div>
           </div>
           <div className="title">
-            <h5 style={{ fontWeight: "400", fontSize: "24px" }}>{convertDate}</h5>
+            <h5 style={{ fontWeight: "400", fontSize: "24px",color: "black" }}>{convertDate}</h5>
           </div>
           <div className="content-table">
             <table className="customers">
               <thead>
                 <tr>
-                  <th>Name</th>
-                  <th>By</th>
-                  <th>$$</th>
-                  <th>Tip</th>
-                  <th>Ser</th>
-                  <th>Note</th>
+                  <th className="space">Name</th>
+                    <th className="small">By</th>
+                    <th className="small">$$</th>
+                    <th className="small">Tip</th>
+                    <th className="small">Ser</th>
+                    <th className="note">Note</th>
                 </tr>
               </thead>
               <tbody>
@@ -189,7 +223,7 @@ function CalViewDetail({ date, updateReport }) {
                     <td style={{ fontWeight: "400" }} onDoubleClick={() => handleEdit(detail.id)}>
                       {detail.name.toUpperCase()}
                     </td>
-                    <td style={detail.by === "CH" ? { fontWeight: "600" } : {}}>{detail.by}</td>
+                    <td style={detail.pay_by === "CH" ? { fontWeight: "600" } : {}}>{detail.pay_by}</td>
                     <td>{detail.amount}</td>
                     <td>{detail.tip}</td>
                     <td>{detail.count}</td>

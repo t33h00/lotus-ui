@@ -25,14 +25,14 @@ function CalendarView() {
   const [mon,setMon] = useState((new Date().getFullYear()+ "-" + (new Date().getMonth()+1).toString().padStart(2,"0") + "%"));
 
   const updateReportState = (newReportData) => {
-    if (!newReportData || !newReportData.date) {
+    if (!newReportData || !newReportData.created_at) { // changed from date to created_at
       console.error("Invalid newReportData:", newReportData);
       return;
     }
 
     // Update the verify state by appending or replacing the data
     const updatedReport = Array.isArray(report)
-      ? [...report.filter((item) => item.date !== newReportData.date), newReportData]
+      ? [...report.filter((item) => item.created_at !== newReportData.created_at), newReportData]
       : [newReportData];
 
     setReport(updatedReport);
@@ -46,7 +46,7 @@ function CalendarView() {
 
   let config = {
     params: {
-      date: mon,
+      created_at: mon,
     },
     withCredentials: true
   };
@@ -92,31 +92,31 @@ function CalendarView() {
   const calendarMap = details.map((detail) => ({
     title: detail.amount,
     allDay: allDay,
-    start: moment(detail.date).toDate(),
-    end: moment(detail.date).toDate(),
+    start: moment(detail.created_at).toDate(),
+    end: moment(detail.created_at).toDate(),
   }));
   var total = details.reduce((accum, item) => accum + item.amount, 0);
 
   const reportMap = report.map((reportItem) => ({
-    date: reportItem.date,
+    created_at: reportItem.created_at, // changed from reportItem.date
     sent: reportItem.sent
   }));
   
   const eventStyleGetter = (event) => {
-    const eventDate = moment(event.start).format('YYYY-MM-DD');
-    const report = reportMap.find(r => r.date === eventDate);
-    const style = {
-      backgroundColor: report && report.sent ? '#48b064' : '',
-      borderRadius: '2px',
-      opacity: 0.8,
-      color: 'white',
-      border: '0px',
-      display: 'block'
-    };
-    return {
-      style: style,
-    };
+  const eventDate = moment(event.start).format('YYYY-MM-DD');
+  const report = reportMap.find(r => r.created_at === eventDate); // compare with created_at
+  const style = {
+    backgroundColor: report && report.sent ? '#48b064' : '',
+    borderRadius: '2px',
+    opacity: 0.8,
+    color: 'white',
+    border: '0px',
+    display: 'block'
   };
+  return {
+    style: style,
+  };
+};
 
   return (
     <>
@@ -145,7 +145,7 @@ function CalendarView() {
         </div>
       </div>
       {date? <div>
-        <CalViewDetail date={date} updateReport = {updateReportState} />
+        <CalViewDetail created_at={date} updateReport = {updateReportState} />
       </div>:<div></div>}
     </>
   );
