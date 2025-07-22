@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import useLocalState from "./useLocalState";
 import axios from "axios";
 import { useReactToPrint } from "react-to-print";
@@ -10,6 +10,9 @@ import { BASE_URL } from "../Service/Service";
 import { requestForToken } from "./firebase";
 import PrivateRoute from "./PrivateRoute";
 import printIcon from "../image/printer.svg";
+import Modal from "./Modal";
+import useModal from "./useModal";
+import EditTransaction from "./EditTransaction";
 
 function Transaction() {
   const TRANSACTION_URL = BASE_URL + "user/findbydate";
@@ -21,73 +24,115 @@ function Transaction() {
   const mili = new Date().getTime() - 21600000;
   const today = new Date(mili).toJSON().slice(0, 10);
   const [startDate, setStartDate] = useState(date ? date : today);
+  const [selectedTransactionId, setSelectedTransactionId] = useState(null);
+  const { isOpen: isEditModalOpen, openModal: openEditModal, closeModal: closeEditModal } = useModal();
 
   const componentRef = useRef();
 
+  // Memoize the print page style to avoid recreating on every render
+  const printPageStyle = useMemo(() => `
+    @page {
+      size: 72mm auto;
+      margin: 0;
+    }
+    @media print {
+      html, body {
+        width: 72mm !important;
+        min-width: 72mm !important;
+        max-width: 72mm !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        padding-left: 0 !important;
+        box-sizing: border-box;
+        background: #fff !important;
+      }
+      body, .wrapper, .content-table, .customers, table, th, td {
+        font-family: "Lucida Console", "Courier New", Courier, monospace !important;
+        font-size: 11px !important;
+        line-height: 1.2 !important;
+        color: #000 !important;
+        font-weight: 550 !important;
+        background: #fff !important;
+      }
+      .printBtn, .non-printable {
+        display: none !important;
+      }
+      .wrapper, .content-table, .customers {
+        width: 72mm !important;
+        min-width: 72mm !important;
+        max-width: 72mm !important;
+        box-sizing: border-box;
+        box-shadow: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        padding-left: 0 !important;
+      }
+      table {
+        table-layout: fixed !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border-spacing: 0 !important;
+        border-collapse: collapse !important;
+      }
+      thead,th, td {
+        width: auto !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        text-align: left !important;
+      }
+      .customers tr {
+        height: 30px !important; /* add vertical spacing between rows */
+      }
+      .small{
+        width: 10% !important;}
+      .note{
+        width: 35% !important;}  
+    }
+  `, []);
+
+  // Print handler for latest react-to-print versions
+  const handlePrintAlternative = useCallback(() => {
+    if (!componentRef.current) {
+      alert('Print content is not ready. Please try again.');
+      return;
+    }
+
+    const printContent = componentRef.current.innerHTML;
+    const printWindow = window.open('', '_blank');
+    
+    if (printWindow) {
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Receipt</title>
+          <style>
+            ${printPageStyle.replace('@media print {', '').replace(/}$/, '')}
+          </style>
+        </head>
+        <body>
+          ${printContent}
+        </body>
+        </html>
+      `);
+      
+      printWindow.document.close();
+      setTimeout(() => {
+        printWindow.print();
+        printWindow.close();
+      }, 500);
+    } else {
+      alert('Pop-up blocked. Please allow pop-ups and try again.');
+    }
+  }, [printPageStyle]);
+
   const handlePrint = useReactToPrint({
-        content: () => componentRef.current,
-        documentTitle: 'receipt',
-        pageStyle: `
-          @page {
-            size: 72mm auto;
-            margin: 0;
-          }
-          @media print {
-            html, body {
-              width: 72mm !important;
-              min-width: 72mm !important;
-              max-width: 72mm !important;
-              margin: 0 !important;
-              padding: 0 !important;
-              padding-left: 0 !important;
-              box-sizing: border-box;
-              background: #fff !important;
-            }
-            body, .wrapper, .content-table, .customers, table, th, td {
-              font-family: "Lucida Console", "Courier New", Courier, monospace !important;
-              font-size: 11px !important;
-              line-height: 1.2 !important;
-              color: #000 !important;
-              font-weight: 550 !important;
-              background: #fff !important;
-            }
-            .printBtn, .non-printable {
-              display: none !important;
-            }
-            .wrapper, .content-table, .customers {
-              width: 72mm !important;
-              min-width: 72mm !important;
-              max-width: 72mm !important;
-              box-sizing: border-box;
-              box-shadow: none !important;
-              margin: 0 !important;
-              padding: 0 !important;
-              padding-left: 0 !important;
-            }
-            table {
-              table-layout: fixed !important;
-              width: 100% !important;
-              margin: 0 !important;
-              padding: 0 !important;
-              border-spacing: 0 !important;
-              border-collapse: collapse !important;
-            }
-            thead,th, td {
-              width: auto !important;
-              margin: 0 !important;
-              padding: 0 !important;
-              text-align: left !important;
-            }
-            .customers tr {
-              height: 30px !important; /* add vertical spacing between rows */
-            }
-            .small{
-              width: 10% !important;}
-            .note{
-              width: 35% !important;}  
-          }
-        `,
-      });
+    contentRef: componentRef,
+    documentTitle: 'receipt',
+    pageStyle: printPageStyle,
+    onPrintError: () => handlePrintAlternative()
+  });
 
   const data = useCallback(async () => {
     try {
@@ -129,12 +174,12 @@ function Transaction() {
     created_at: startDate,
   });
 
-  const handleChange = (e) => {
+  const handleChange = useCallback((e) => {
     const value = e.target.value;
     setTransaction({ ...transaction, [e.target.name]: value });
-  };
+  }, [transaction]);
 
-  const saveTransaction = async () => {
+  const saveTransaction = useCallback(async () => {
     try {
       await axios.post(SAVE_TRANSACTION, transaction, {
         headers: { "Content-Type": "application/json" },
@@ -147,34 +192,47 @@ function Transaction() {
       alert("Session Expired! Please login again.");
       navigate("/login");
     }
-  };
+  }, [SAVE_TRANSACTION, transaction, data, navigate]);
 
-  const handleClear = () => {
+  const handleClear = useCallback(() => {
     setTransaction({
       id: "",
       name: "",
       amount: "",
       tip: "",
       count: "",
-      by: "CC",
+      pay_by: "CC",
       note: "",
       created_at: startDate,
     });
-  };
+  }, [startDate]);
 
-  function handleEdit(id) {
-    navigate(`/EditTransaction/${id}`);
-  }
+  const handleEdit = useCallback((id) => {
+    setSelectedTransactionId(id);
+    openEditModal();
+  }, [openEditModal]);
 
-  const total = details.reduce((accum, item) => accum + item.amount, 0);
-  const tipTotal = details.reduce((accum, item) => accum + item.tip, 0).toFixed(1);
-  const serviceTotal = details.reduce((accum, item) => accum + item.count, 0);
-  let cashTotal = 0;
-  let venmo = 0;
-  details.forEach((detail) => {
-    if (detail.pay_by === "CH") cashTotal += detail.amount;
-    if (detail.pay_by === "VE") venmo += detail.amount;
-  });
+  const handleCloseEditModal = useCallback(() => {
+    closeEditModal();
+    setSelectedTransactionId(null);
+    data(); // Refresh data after closing modal
+  }, [closeEditModal, data]);
+
+  // Memoize expensive calculations
+  const calculations = useMemo(() => {
+    const total = details.reduce((accum, item) => accum + item.amount, 0);
+    const tipTotal = details.reduce((accum, item) => accum + item.tip, 0).toFixed(1);
+    const serviceTotal = details.reduce((accum, item) => accum + item.count, 0);
+    
+    let cashTotal = 0;
+    let venmo = 0;
+    details.forEach((detail) => {
+      if (detail.pay_by === "CH") cashTotal += detail.amount;
+      if (detail.pay_by === "VE") venmo += detail.amount;
+    });
+
+    return { total, tipTotal, serviceTotal, cashTotal, venmo };
+  }, [details]);
 
   return (
     <>
@@ -202,7 +260,7 @@ function Transaction() {
               <div style={{ width: "55px" }} className="custom_select">
                 <select
                   name="pay_by"
-                  value={transaction.by}
+                  value={transaction.pay_by}
                   onChange={handleChange}
                 >
                   <option value="CC">CC</option>
@@ -278,7 +336,7 @@ function Transaction() {
           </div>
         </div>
       </div>
-      {total !== 0 && (
+      {calculations.total !== 0 && (
         <>
           <div style={{ paddingBottom: "70px" }}
             className="wrapper"
@@ -317,7 +375,7 @@ function Transaction() {
                       <td style={{ fontWeight: "500" }} onDoubleClick={() => handleEdit(detail.id)}>
                         {detail.name.toUpperCase()}
                       </td>
-                      {detail.by === "CH" ? (
+                      {detail.pay_by === "CH" ? (
                         <td style={{ fontWeight: "600" }}>{detail.pay_by}</td>
                       ) : (
                         <td>{detail.pay_by}</td>
@@ -333,9 +391,9 @@ function Transaction() {
                   <tr>
                     <td style={{ fontWeight: "500" }}>TOTAL:</td>
                     <td></td>
-                    <td>{total}</td>
-                    <td>{tipTotal}</td>
-                    <td>{serviceTotal}</td>
+                    <td>{calculations.total}</td>
+                    <td>{calculations.tipTotal}</td>
+                    <td>{calculations.serviceTotal}</td>
                     <td>
                     </td>
                   </tr>
@@ -343,12 +401,21 @@ function Transaction() {
               </table>
             </div>
             <div style={{ display: "flex", justifyContent: "center", padding: "5px" }}>
-              <div style={{ margin: "auto", fontWeight: "bold" }}>Cash: {cashTotal}</div>
-              <div style={{ margin: "auto", fontWeight: "bold" }}>Venmo: {venmo}</div>
+              <div style={{ margin: "auto", fontWeight: "bold" }}>Cash: {calculations.cashTotal}</div>
+              <div style={{ margin: "auto", fontWeight: "bold" }}>Venmo: {calculations.venmo}</div>
             </div>
           </div>
         </>
       )}
+      
+      <Modal isOpen={isEditModalOpen} onClose={handleCloseEditModal}>
+        {selectedTransactionId && (
+          <EditTransaction 
+            transactionId={selectedTransactionId} 
+            onClose={handleCloseEditModal}
+          />
+        )}
+      </Modal>
     </>
   );
 }

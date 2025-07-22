@@ -6,7 +6,6 @@ import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { BASE_URL } from "../Service/Service";
 import PrivateRoute from "./PrivateRoute";
-import { tr } from "date-fns/locale";
 
 const payType = [
   {value: "CH", label:"CH"},
@@ -16,13 +15,16 @@ const payType = [
   {value: "GC", label:"GC"},
 ]
 
-function EditTransaction() {
+function EditTransaction({ transactionId, onClose }) {
     const TRANSACTION_URL = BASE_URL + "user/transaction";
     const UPDATE_URL = BASE_URL + "user/edittransaction";
     const DELETE_URL = BASE_URL + "user/deletetransaction";
-    const { id } = useParams();
+    const { id: urlId } = useParams();
     const navigate = useNavigate();
     const[transaction,setTransaction] = useState([])
+    
+    // Use transactionId prop if provided (modal mode), otherwise use URL param
+    const id = transactionId || urlId;
     
     let config = {
       params: {
@@ -44,11 +46,16 @@ function EditTransaction() {
                   }}
         useEffect(()=>{
           fetchData();
-        },[]);
+        },[id]);
 
   const editTransaction = async () =>{
     try{  await axios.put(UPDATE_URL,transaction,config);
-        navigate(-1);
+        // If onClose prop is provided (modal mode), call it; otherwise navigate back
+        if (onClose) {
+          onClose();
+        } else {
+          navigate(-1);
+        }
     }catch(error){
         alert("Session Expired! Please login again.")
         navigate("/login")
@@ -63,7 +70,12 @@ function EditTransaction() {
         withCredentials: true
     }
     try{  await axios.delete(DELETE_URL,config);
-        navigate(-1);
+        // If onClose prop is provided (modal mode), call it; otherwise navigate back
+        if (onClose) {
+          onClose();
+        } else {
+          navigate(-1);
+        }
     }catch(error){
         alert("Session Expired! Please login again.")
         navigate("/login")
@@ -119,7 +131,7 @@ function EditTransaction() {
                 value={transaction.amount}
               />
             </div>
-            <div style={{ width: "auto" }} className="inputfield small-field">
+            <div style={{ width: "auto" }} className="inputfield">
               <input
                 type="number" pattern="[0-9]*"
                 placeholder="Tip"
@@ -129,7 +141,7 @@ function EditTransaction() {
                 onChange={(e) => handleChange(e)}
               />
             </div>
-            <div style={{ width: "auto" }} className="inputfield small-field">
+            <div style={{ width: "auto" }} className="inputfield">
               <input
                 type="number" pattern="[0-9]*"
                 placeholder="Service"
@@ -139,7 +151,7 @@ function EditTransaction() {
                 onChange={(e) => handleChange(e)}
               />
             </div>
-            <div className="inputfield small-field">
+            <div className="inputfield">
               <input
                 type="date"
                 style={{ width: "auto" }}
@@ -162,8 +174,8 @@ function EditTransaction() {
               onChange={(e) => handleChange(e)}
             />
           </div>
-          <div>
-            <div className="inputfield">
+          <div style={{ display: "flex", gap: "10px" }}>
+            <div className="inputfield" style={{ flex: 1 }}>
                 <input
                 type="button"
                 onClick={() => {
@@ -173,7 +185,7 @@ function EditTransaction() {
                 className="btn"
                 />
             </div>
-            <div className="inputfield">
+            <div className="inputfield" style={{ flex: 1 }}>
             <input
               type="button"
               onClick={() => {
@@ -182,7 +194,17 @@ function EditTransaction() {
               value="Delete"
               className="btn"
             />
-          </div>
+            </div>
+            {onClose && (
+              <div className="inputfield" style={{ flex: 1 }}>
+                <input
+                  type="button"
+                  onClick={onClose}
+                  value="Cancel"
+                  className="btn"
+                />
+              </div>
+            )}
           </div>
         </div>
       </div>

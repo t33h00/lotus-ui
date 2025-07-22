@@ -16,7 +16,6 @@ import PrivateRoute from "./PrivateRoute";
 
 function CalendarView() {
   const FINDALL_URL = BASE_URL +  "user/calendarview";
-  const SAVE_REPORT = BASE_URL + "user/reportmonth";
   const navigate = useNavigate();
   const allDay = true;
   const [details, setDetails] = useState([]);
@@ -25,7 +24,7 @@ function CalendarView() {
   const [mon,setMon] = useState((new Date().getFullYear()+ "-" + (new Date().getMonth()+1).toString().padStart(2,"0") + "%"));
 
   const updateReportState = (newReportData) => {
-    if (!newReportData || !newReportData.created_at) { // changed from date to created_at
+    if (!newReportData || !newReportData.created_at) {
       console.error("Invalid newReportData:", newReportData);
       return;
     }
@@ -51,29 +50,23 @@ function CalendarView() {
     withCredentials: true
   };
 
-  const getReport = async () => {
-    try {
-      await axios
-        .get(SAVE_REPORT, config)
-        .then((res) => {
-          setReport(res.data); // Ensure res.data is set correctly
-        });
-    } catch (error) {
-      alert("Session Expired! Please login again.");
-      navigate("/login");
-    }
-  }
-
   const data = async () => {
     try{
-      await axios.get(FINDALL_URL, config).then((res) => setDetails(res.data));
+      await axios.get(FINDALL_URL, config).then((res) => {
+        setDetails(res.data);
+        // Filter report data to only include created_at and sent
+        const filteredReport = res.data.map(item => ({
+          created_at: item.created_at,
+          sent: item.sent
+        }));
+        setReport(filteredReport);
+      });
     } catch (error){
       navigate("/login")
     }
   };
 
   useEffect(() => {
-    getReport();
     data();
   }, [mon]);
 
@@ -98,15 +91,15 @@ function CalendarView() {
   var total = details.reduce((accum, item) => accum + item.amount, 0);
 
   const reportMap = report.map((reportItem) => ({
-    created_at: reportItem.created_at, // changed from reportItem.date
+    created_at: reportItem.created_at,
     sent: reportItem.sent
   }));
   
   const eventStyleGetter = (event) => {
   const eventDate = moment(event.start).format('YYYY-MM-DD');
-  const report = reportMap.find(r => r.created_at === eventDate); // compare with created_at
+  const report = reportMap.find(r => r.created_at === eventDate);
   const style = {
-    backgroundColor: report && report.sent ? '#48b064' : '',
+    backgroundColor: report && report.sent ==='true' ? '#48b064' : '',
     borderRadius: '2px',
     opacity: 0.8,
     color: 'white',

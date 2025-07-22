@@ -15,6 +15,7 @@ export const logout = async (navigate) => {
     );
     await new Promise((resolve) => {
       localStorage.removeItem("@secure.s.user");
+      localStorage.removeItem("earning_cache");
       localStorage.removeItem("user");
       resolve(); // Resolve the promise after state updates
     });

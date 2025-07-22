@@ -9,6 +9,9 @@ import PrivateRoute from "./PrivateRoute";
 import sendIcon from "../image/send.svg";
 import sentIcon from "../image/sent.png";
 import printIcon from "../image/printer.svg";
+import Modal from "./Modal";
+import useModal from "./useModal";
+import EditTransaction from "./EditTransaction";
 
 function CalViewDetail({ created_at, updateReport }) {
   const TRANSACTION_URL = BASE_URL + "user/findbydate";
@@ -18,6 +21,8 @@ function CalViewDetail({ created_at, updateReport }) {
   const [user] = useLocalState("", "user");
   const [isFormSent, setIsFormSent] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [selectedTransactionId, setSelectedTransactionId] = useState(null);
+  const { isOpen: isEditModalOpen, openModal: openEditModal, closeModal: closeEditModal } = useModal();
   const convertDate = created_at?.toISOString().slice(0, 10);
 
   // Memoize config and report so their references don't change on every render
@@ -31,73 +36,112 @@ function CalViewDetail({ created_at, updateReport }) {
     sent: true,
   }), [convertDate]);
 
-  const componentRef = useRef();
-
-  const handlePrint = useReactToPrint({
-          content: () => componentRef.current,
-          documentTitle: 'receipt',
-          pageStyle: `
-            @page {
-              size: 72mm auto;
-              margin: 0;
-            }
-            @media print {
-              html, body {
-                width: 72mm !important;
-                min-width: 72mm !important;
-                max-width: 72mm !important;
-                margin: 0 !important;
-                padding: 0 !important;
-                box-sizing: border-box;
-                background: #fff !important;
-              }
-              body, .wrapper, .content-table, .customers, table, th, td {
-                font-family: "Lucida Console", "Courier New", Courier, monospace !important;
-                font-size: 11px !important;
-                line-height: 1.2 !important;
-                color: #000 !important;
-                font-weight: 550 !important;
-                background: #fff !important;
-              }
-              .printBtn, .non-printable {
-                display: none !important;
-              }
-              .wrapper, .content-table, .customers {
-                width: 72mm !important;
-                min-width: 72mm !important;
-                max-width: 72mm !important;
-                box-sizing: border-box;
-                box-shadow: none !important;
-                margin: 0 !important;
-                padding-right: 6px !important; /* add a little right padding */
-                padding-left: 0 !important;
-                padding-top: 0 !important;
-                padding-bottom: 0 !important;
-              }
-              table {
-                table-layout: fixed !important;
-                width: 100% !important;
-                margin: 0 !important;
-                padding: 0 !important;
-                border-spacing: 0 !important;
-                border-collapse: collapse !important;
-              }
-              thead,th, td {
-                width: auto !important;
-                margin: 0 !important;
-                padding: 0 !important;
-                text-align: left !important;
-              }
-              .customers tr {
-                height: 30px !important; /* add vertical spacing between rows */
-              }
-              .small{
-                width: 10% !important;}
-              .note{
-                width: 35% !important;}  
-            }
-          `,
-        });
+    const componentRef = useRef();
+  
+    // Memoize the print page style to avoid recreating on every render
+    const printPageStyle = useMemo(() => `
+      @page {
+        size: 72mm auto;
+        margin: 0;
+      }
+      @media print {
+        html, body {
+          width: 72mm !important;
+          min-width: 72mm !important;
+          max-width: 72mm !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          padding-left: 0 !important;
+          box-sizing: border-box;
+          background: #fff !important;
+        }
+        body, .wrapper, .content-table, .customers, table, th, td {
+          font-family: "Lucida Console", "Courier New", Courier, monospace !important;
+          font-size: 11px !important;
+          line-height: 1.2 !important;
+          color: #000 !important;
+          font-weight: 550 !important;
+          background: #fff !important;
+        }
+        .printBtn, .non-printable {
+          display: none !important;
+        }
+        .wrapper, .content-table, .customers {
+          width: 72mm !important;
+          min-width: 72mm !important;
+          max-width: 72mm !important;
+          box-sizing: border-box;
+          box-shadow: none !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          padding-left: 0 !important;
+        }
+        table {
+          table-layout: fixed !important;
+          width: 100% !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          border-spacing: 0 !important;
+          border-collapse: collapse !important;
+        }
+        thead,th, td {
+          width: auto !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          text-align: left !important;
+        }
+        .customers tr {
+          height: 30px !important; /* add vertical spacing between rows */
+        }
+        .small{
+          width: 10% !important;}
+        .note{
+          width: 35% !important;}  
+      }
+    `, []);
+  
+    // Print handler for latest react-to-print versions
+    const handlePrintAlternative = useCallback(() => {
+      if (!componentRef.current) {
+        alert('Print content is not ready. Please try again.');
+        return;
+      }
+  
+      const printContent = componentRef.current.innerHTML;
+      const printWindow = window.open('', '_blank');
+      
+      if (printWindow) {
+        printWindow.document.write(`
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <title>Receipt</title>
+            <style>
+              ${printPageStyle.replace('@media print {', '').replace(/}$/, '')}
+            </style>
+          </head>
+          <body>
+            ${printContent}
+          </body>
+          </html>
+        `);
+        
+        printWindow.document.close();
+        setTimeout(() => {
+          printWindow.print();
+          printWindow.close();
+        }, 500);
+      } else {
+        alert('Pop-up blocked. Please allow pop-ups and try again.');
+      }
+    }, [printPageStyle]);
+  
+    const handlePrint = useReactToPrint({
+      contentRef: componentRef,
+      documentTitle: 'receipt',
+      pageStyle: printPageStyle,
+      onPrintError: () => handlePrintAlternative()
+    });
 
   const getReport = useCallback(async () => {
     try {
@@ -127,8 +171,15 @@ function CalViewDetail({ created_at, updateReport }) {
   }, [created_at, fetchDetails, getReport]);
 
   const handleEdit = (id) => {
-    navigate(`/EditTransaction/${id}`);
+    setSelectedTransactionId(id);
+    openEditModal();
   };
+
+  const handleCloseEditModal = useCallback(() => {
+    closeEditModal();
+    setSelectedTransactionId(null);
+    fetchDetails(); // Refresh data after closing modal
+  }, [closeEditModal, fetchDetails]);
 
   const total = details.reduce((accum, item) => accum + item.amount, 0);
   const tipTotal = details.reduce((accum, item) => accum + item.tip, 0).toFixed(1);
@@ -249,6 +300,15 @@ function CalViewDetail({ created_at, updateReport }) {
       ) : (
         <div className="loading"></div>
       )}
+      
+      <Modal isOpen={isEditModalOpen} onClose={handleCloseEditModal}>
+        {selectedTransactionId && (
+          <EditTransaction 
+            transactionId={selectedTransactionId} 
+            onClose={handleCloseEditModal}
+          />
+        )}
+      </Modal>
     </>
   );
 }
