@@ -22,6 +22,8 @@
     "firebase-functions": "^4.0.1",
     "fullcalendar": "^6.1.9",
     "install": "^0.13.0",
+    "jspdf": "^2.5.2",
+    "jspdf-autotable": "^3.8.4",
     "react": "^18.2.0",
     "react-big-calendar": "^1.8.4",
     "react-bootstrap": "^2.10.3",

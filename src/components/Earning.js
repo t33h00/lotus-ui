@@ -34,6 +34,40 @@ function Earning() {
     `
   });
 
+  // Email Report function
+  const emailReport = async () => {
+    if (!window.confirm('Send earnings report to Minh?')) {
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const response = await axios.post(BASE_URL + "user/email-report", {
+        created_at1: date1,
+        created_at2: date2,
+        rate: rate,
+        recipientEmail: "Lotusspanail@gmail.com"
+      }, {
+        withCredentials: true
+      });
+      
+      if (response.data.success) {
+        alert('Report has been sent successfully to Minh!');
+      } else {
+        alert('Failed to send email report. Please try again.');
+      }
+      
+    } catch (error) {
+      setError("Failed to send email report.");
+      alert('Error sending email report. Please try again.');
+      console.error('Email error:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const LOCAL_CACHE_KEY = "earning_cache";
 
   const fetchData = async () => {
@@ -164,6 +198,16 @@ function Earning() {
               <option value={80}>80</option>
             </select>
           </div>
+          
+          <div className="inputfield flex justify-center">
+            <button 
+              onClick={emailReport}
+              className="btn"
+              disabled={loading || !details.length}
+            >
+              Email Report
+            </button>
+          </div>
         </div>
       </div>
       {/* --------------------------  */}
@@ -225,10 +269,12 @@ function Earning() {
                       <td></td>
                       <td>{cash}</td>
                     </tr>
-                    <td>Cash this period</td>
-                    <td></td>
-                    <td></td>
-                    <td>({payCH})</td>
+                    <tr>
+                      <td>Cash this period</td>
+                      <td></td>
+                      <td></td>
+                      <td>({payCH})</td>
+                    </tr>
                   </tfoot>
                   <tfoot>
                   <tr>

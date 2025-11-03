@@ -71,8 +71,17 @@ function Login() {
         />
       </Helmet>
 
-      <section className="login">
-        {/* <img  src={logo} alt="Logo" className="login-logo" /> */}
+      <section className="login" style={{
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "flex-start",
+        alignItems: "center",
+        minHeight: "100vh",
+        paddingTop: "15vh",
+        paddingLeft: "20px",
+        paddingRight: "20px",
+        paddingBottom: "20px"
+      }}>
         <div className="login-card">
           <h1 className="login-heading">Sign in to your account</h1>
           <form className="login-form" onSubmit={handleSubmit}>

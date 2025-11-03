@@ -1,7 +1,8 @@
 import React from 'react';
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom';
 import './App.css';
 import Navibar from "./components/Navibar";
+import BottomNavbar from './components/BottomNavbar';
 import Reset from './components/Reset';
 import Email from './components/Email';
 import Transaction from './components/Transaction';
@@ -18,29 +19,44 @@ import Test from './components/Test';
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min";
 
+function AppContent() {
+  const location = useLocation();
+  
+  // Routes where only bottom navigation should be hidden
+  const noBottomNavRoutes = ['/login', '/signup', '/reset'];
+  const showBottomNav = !noBottomNavRoutes.includes(location.pathname);
+
+  return (
+    <>
+      <Navibar />
+      <PwaInstallPrompt />
+      <HelmetProvider>
+        <Routes>
+          <Route path="*" element={<Transaction />}></Route>
+          <Route path="/transaction/:date" element={<Transaction />}></Route>
+          <Route index element={<Transaction />}></Route>
+          <Route path='/user' element={ <User /> } />
+          <Route path='/earning' element={<Earning />}></Route>
+          <Route path='/calendarview' element={<CalendarView />} />
+          <Route path='/calviewdetail' element={<CalViewDetail />} />
+          <Route path='/edittransaction/:id' element={<EditTransaction />} />
+          <Route path='/login' element={<Login />}></Route>
+          <Route path='/reset' element={<Reset />}></Route>
+          <Route path='/email' element={<Email />}></Route>
+          <Route path='/signup' element={<SignUp />} />
+          <Route path='/test' element={<Test />} />
+        </Routes>
+      </HelmetProvider>
+      {showBottomNav && <BottomNavbar />}
+    </>
+  );
+}
+
 function App() {
   return (
-      <BrowserRouter>
-        <Navibar />
-        <PwaInstallPrompt />
-        <HelmetProvider>
-          <Routes>
-            <Route path="*" element={<Transaction />}></Route>
-            <Route path="/transaction/:date" element={<Transaction />}></Route>
-            <Route index element={<Transaction />}></Route>
-            <Route path='/user' element={ <User /> } />
-            <Route path='/earning' element={<Earning />}></Route>
-            <Route path='/calendarview' element={<CalendarView />} />
-            <Route path='/calviewdetail' element={<CalViewDetail />} />
-            <Route path='/edittransaction/:id' element={<EditTransaction />} />
-            <Route path='/login' element={<Login />}></Route>
-            <Route path='/reset' element={<Reset />}></Route>
-            <Route path='/email' element={<Email />}></Route>
-            <Route path='/signup' element={<SignUp />} />
-            <Route path='/test' element={<Test />} />
-          </Routes>
-        </HelmetProvider>
-      </BrowserRouter>
+    <BrowserRouter>
+      <AppContent />
+    </BrowserRouter>
   );
 }
 

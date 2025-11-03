@@ -46,6 +46,8 @@
 
 table {
     width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
 }
 
 thead, tfoot {
@@ -78,14 +80,7 @@ tbody tr:last-child td {
 
 tfoot tr:first-child td {
     padding-top: 15px;
-}
-
-tfoot::before {
-    content: '';
-    width: 100%;
-    border-top: 1px dashed #000;
-    display: block;
-    position: absolute;
+    border-top: 1.5px solid #3b3a3a;
 }
 
 tfoot tr:first-child td:first-child, tfoot tr:first-child td:last-child {
