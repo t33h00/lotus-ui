@@ -5,7 +5,7 @@
     margin: 20px auto 30px auto;
     box-shadow: 0px 0px 20px 0px rgba(65, 39, 65, 0.47);
     padding: 20px;
-    background-color: #fff;
+    background-color: var(--bg-secondary);
     border-radius: 20px;
     display: flex;
     flex-direction: column;

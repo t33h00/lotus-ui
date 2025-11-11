@@ -17,7 +17,7 @@
 
 .wrapper .form .small-box{
     vertical-align: middle;
-    background-color: #fff;    
+    background-color: var(--bg-secondary);    
 }
 
 .wrapper .form .inputfields .input,

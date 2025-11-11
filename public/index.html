@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta name="theme-color" content="#5265c4">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#5265c4" media="(prefers-color-scheme: light)">
-    <meta name="mobile-web-app-status-bar-style" content="#5265c4" media="(prefers-color-scheme: dark)">
     <meta charset="utf-8" />
     <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#5265c4" />
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Lotus" />
     <meta
-      name="Lotus"
+      name="description"
       content="Wage record"
     />
     <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
@@ -28,6 +28,76 @@
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
     <title>Lotus</title>
+    
+    <!-- CSS-based status bar styling (modern approach for iOS 18.1+) -->
+    <style>
+      /* Status bar area management */
+      :root {
+        --status-bar-height: env(safe-area-inset-top);
+        --theme-color: #5265c4;
+      }
+
+      /* PWA Status Bar Management - backgrounds handled by index.css */
+      body {
+        margin: 0;
+        padding: 0;
+        padding-top: var(--status-bar-height);
+      }
+
+      /* iOS Safe Area Support */
+      #root {
+        min-height: calc(100vh - env(safe-area-inset-top));
+      }
+
+      /* For PWA mode - status bar overlay */
+      @supports (-webkit-touch-callout: none) {
+        /* iOS-specific styles */
+        body::before {
+          content: '';
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: var(--status-bar-height);
+          background-color: var(--theme-color); /* Status bar overlay */
+          z-index: 9999;
+          pointer-events: none;
+        }
+
+        /* Hide overlay when hiding status bar */
+        .hide-status-bar body::before {
+          display: none;
+        }
+      }
+
+      /* Toggle class for runtime control */
+      .fullscreen-mode {
+        padding-top: 0 !important;
+      }
+
+      .fullscreen-mode #root {
+        min-height: 100vh !important;
+      }
+
+      /* Prevent pull-to-refresh and bounce effects */
+      html, body {
+        overscroll-behavior-y: none; /* Prevents pull-to-refresh and bounce */
+        overflow-x: hidden;
+        /* Allow normal vertical scrolling */
+      }
+
+      /* iOS-specific bounce prevention */
+      body {
+        -webkit-touch-callout: none;
+        -webkit-tap-highlight-color: transparent;
+        /* Allow text selection for inputs */
+      }
+
+      /* PWA mode specific styles */
+      .pwa-mode {
+        overscroll-behavior: none;
+      }
+    </style>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>

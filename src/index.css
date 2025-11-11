@@ -2,12 +2,32 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Global Theme Variables */
+:root {
+    --theme-color: #5265c4;
+    --bg-primary: #5265c4;
+    --bg-secondary: #ffffff;
+    --bg-hover: #ddd;
+    --bg-disabled: #d5dbd9;
+}
+
+/* Global Background Colors - Override Tailwind and ensure consistency */
+html, body {
+    background-color: var(--bg-primary) !important;
+    margin: 0;
+    padding: 0;
+}
 
 #root {
-    background-color: #5265c4;
+    background-color: var(--bg-primary) !important;
+    min-height: 100vh;
 }
-html{
-    background-color: #5265c4;
+
+/* Ensure all main containers use theme color */
+.App {
+    background-color: var(--bg-primary) !important;
+    min-height: 100vh;
+    padding-top: 60px; /* Space for fixed navbar */
 }
 
 input[type="number"]::-webkit-outer-spin-button,

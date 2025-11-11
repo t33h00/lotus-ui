@@ -16,11 +16,15 @@ import User from './components/User';
 import SignUp from './components/SignUp';
 import { HelmetProvider } from 'react-helmet-async';
 import Test from './components/Test';
+import { usePreventBounce } from './hooks/usePreventBounce';
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min";
 
 function AppContent() {
   const location = useLocation();
+  
+  // Prevent bounce and pull-to-refresh
+  usePreventBounce(true);
   
   // Routes where only bottom navigation should be hidden
   const noBottomNavRoutes = ['/login', '/signup', '/reset'];

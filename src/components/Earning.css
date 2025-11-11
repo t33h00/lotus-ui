@@ -1,7 +1,7 @@
 .container {
     display: block;
     width: 100%;
-    background: #fff;
+    background: var(--bg-secondary);
     max-width: 500px;
     padding: 20px;
     margin: 30px auto 0;

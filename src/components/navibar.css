@@ -3,13 +3,17 @@
     max-width: 550px;
     width: 100%;
     margin: auto;
-    top:0;
+    position: fixed;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
     height: 60px;
-    display:flex;
+    display: flex;
     justify-content: space-between;
-    background: #5265c4;
+    background: var(--bg-primary);
     border-radius: 0 0 20px 20px;
     box-shadow: 0px 0px 20px 0px rgba(65, 39, 65, 0.47);
+    z-index: 1000;
   }
   
   .Navbar > .nav-logo {

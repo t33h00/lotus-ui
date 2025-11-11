@@ -18,8 +18,10 @@
       "type": "image/png"
     }
   ],
-  "start_url": "/",
+  "start_url": ".",
   "display": "standalone",
+  "orientation": "portrait",
   "theme_color": "#5265c4",
-  "background_color": "#5265c4"
+  "background_color": "#5265c4",
+  "display_override": ["window-controls-overlay", "standalone"]
 }
